@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get set up · ItGo.ai</title>
+<meta name="description" content="Tell us about your detailing business and we'll set up your ItGo.ai text assistant.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Form pieces on top of the shared site styles */
+fieldset{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:18px 20px;margin:0 0 20px;min-width:0}
+legend{font:800 20px var(--display);padding:0 6px}
+.hint{color:var(--muted);font-size:16px;margin:0 0 14px}
+label{display:block;font-weight:700;margin:0 0 14px}
+label small{display:block;font-weight:400;color:var(--muted);font-size:15px}
+input,select,textarea{display:block;width:100%;margin-top:6px;font:inherit;font-size:17px;padding:11px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.choice{display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:0 0 10px}
+.choice input{width:auto;margin:4px 0 0;flex:none;transform:scale(1.25)}
+.day{display:grid;grid-template-columns:120px 1fr 1fr;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.day:first-of-type{border-top:0}
+.day .choice{margin:0;font-weight:700}
+.day input[type=time]{margin:0}
+.day.closed input[type=time]{opacity:.35}
+.svc{border-top:1px solid var(--line);padding-top:14px;margin-top:4px}
+.svc:first-of-type{border-top:0;padding-top:0}
+.svc-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:0 12px}
+button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;padding:13px 18px}
+.add{background:none;border:2px dashed var(--line);color:var(--ink);width:100%}
+.remove{background:none;color:var(--muted);text-decoration:underline;padding:4px 0;font-weight:400;font-size:15px}
+.go{background:var(--accent);color:#14212e;font-size:19px;width:100%;padding:16px}
+.go[disabled]{opacity:.6;cursor:wait}
+.msg{margin:14px 0 0;font-weight:700}
+.msg.err{color:#b3261e}
+@media (prefers-color-scheme:dark){.msg.err{color:#ff8a80}}
+.done{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+@media (max-width:640px){.two,.svc-row{grid-template-columns:1fr}.day{grid-template-columns:1fr 1fr}.day .choice{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a class="logo" href="index.html">ItGo<span>.ai</span></a>
+<nav><a href="index.html">Home</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav></div></header>
+<main class="wrap">
+<h1 style="font:800 36px/1.1 var(--display);margin:0 0 8px">Get your text assistant set up</h1>
+<p class="muted" style="margin:0 0 28px">Takes about 5 minutes. The assistant uses these answers to quote prices, offer open times and book jobs the way you would. You can change anything later.</p>
+
+<form id="f" novalidate>
+<fieldset>
+<legend>You and your business</legend>
+<label>Business name<input name="business_name" required autocomplete="organization" placeholder="Mike's Mobile Detailing"></label>
+<div class="two">
+<label>Your name<input name="owner_name" required autocomplete="name"></label>
+<label>Your cell phone<small>Booking requests are texted here for you to approve.</small><input name="owner_phone" required type="tel" autocomplete="tel" placeholder="(555) 555-0100"></label>
+</div>
+<label>Email<input name="email" type="email" autocomplete="email"></label>
+</fieldset>
+
+<fieldset>
+<legend>Where you work</legend>
+<label class="choice"><input type="radio" name="service_mode" value="mobile" checked> I come to the customer (mobile)</label>
+<label class="choice"><input type="radio" name="service_mode" value="shop"> Customers come to my shop</label>
+<label class="choice"><input type="radio" name="service_mode" value="both"> Both</label>
+<label>Area you cover<small>For example: "Tulsa and about 25 miles around"</small><input name="service_area"></label>
+<label>Shop address<small>Only if customers come to you.</small><input name="shop_address" autocomplete="street-address"></label>
+</fieldset>
+
+<fieldset>
+<legend>Hours</legend>
+<p class="hint">When can jobs be booked? Untick the days you're closed.</p>
+<div id="days"></div>
+<label class="choice" style="margin-top:14px"><input type="checkbox" name="after_hours_ok" checked> Jobs can run past closing time if they start before it</label>
+</fieldset>
+
+<fieldset>
+<legend>Services and prices</legend>
+<p class="hint">List what you offer and your normal starting price. "What's included" helps the assistant answer questions.</p>
+<div id="svcs"></div>
+<button class="add" type="button" id="addSvc">+ Add another service</button>
+</fieldset>
+
+<fieldset>
+<legend>Pricing rules</legend>
+<p class="hint" style="margin-bottom:10px">When a customer asks for a lower price:</p>
+<label class="choice"><input type="radio" name="discount_policy" value="ask" checked> Text me and I'll decide</label>
+<label class="choice"><input type="radio" name="discount_policy" value="never"> Never discount, offer a cheaper service instead</label>
+<label class="choice"><input type="radio" name="discount_policy" value="allowed"> The assistant can take off up to a set amount</label>
+<label>Most it can take off ($)<small>Only used with the last option.</small><input name="max_discount" type="number" min="0" step="5" inputmode="numeric" placeholder="20"></label>
+</fieldset>
+
+<fieldset>
+<legend>Anything else</legend>
+<label>Google review link<small>Sent to customers after each job. In Google Maps, open your business, tap "Ask for reviews" or "Share review form", and copy the link. Leave it blank if you're not sure.</small><input name="review_link" type="url" inputmode="url" placeholder="https://g.page/r/..."></label>
+<label>What should the assistant know?<small>Water and power, payment methods, deposits, extra charges for pet hair or heavy dirt, things you don't do.</small><textarea name="ai_notes" placeholder="We bring our own water and power. Pet hair is $25 extra. Cash, card or Venmo after the job."></textarea></label>
+<label>How do customers book with you now?<textarea name="current_booking" style="min-height:60px" placeholder="Texts and Instagram DMs, I write it in my calendar"></textarea></label>
+</fieldset>
+
+<fieldset>
+<label class="choice"><input type="checkbox" name="sms_consent" required> I agree to get texts from ItGo.ai at my cell phone about setup and booking requests for my business. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. See the <a href="terms.html">terms</a> and <a href="privacy.html">privacy policy</a>.</label>
+</fieldset>
+
+<button class="go" id="go">Send my answers</button>
+<p class="msg" id="msg" role="status"></p>
+</form>
+
+<div class="done" id="done" hidden>
+<h2 style="margin-top:0">Got it, thanks!</h2>
+<p>We'll set up your assistant and text you when it's ready to try. Questions? Email <a href="mailto:itgo.ai@outlook.com">itgo.ai@outlook.com</a>.</p>
+</div>
+</main>
+<footer><div class="wrap"><span>© 2026 ItGo.ai. Operated by William W Gay.</span><span><a href="privacy.html">Privacy policy</a> · <a href="terms.html">Terms</a></span></div></footer>
+
+<script>
+(function(){
+  // Answers go straight into the Supabase "signups" table. This key can only add rows, not read them.
+  const API = "https://htlssigvpaacxenogkog.supabase.co/rest/v1/signups";
+  const KEY = "sb_publishable_imCpDD2KiLuRlwI2OGmSww_IVZZ8fS7";
+  const f = document.getElementById("f");
+  const $ = id => document.getElementById(id);
+
+  const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  [1, 2, 3, 4, 5, 6, 0].forEach(d => {
+    const row = document.createElement("div");
+    row.className = "day" + (d === 0 ? " closed" : "");
+    row.innerHTML = '<label class="choice"><input type="checkbox"> </label>'
+      + '<input type="time" value="08:00" aria-label="Opens"><input type="time" value="18:00" aria-label="Closes">';
+    row.querySelector(".choice").append(DAYS[d]);
+    const box = row.querySelector("input[type=checkbox]");
+    box.checked = d !== 0;
+    box.onchange = () => row.classList.toggle("closed", !box.checked);
+    row.dataset.day = d;
+    $("days").appendChild(row);
+  });
+
+  const EXAMPLES = [
+    ["Exterior wash & wax", "75", "1.5"], ["Interior detail", "150", "2.5"], ["Full detail", "225", "4"]];
+  function addService(ex) {
+    const s = document.createElement("div");
+    s.className = "svc";
+    s.innerHTML = '<div class="svc-row">'
+      + '<label>Service<input data-k="name"></label>'
+      + '<label>Price ($)<input data-k="price" type="number" min="0" step="5" inputmode="numeric"></label>'
+      + '<label>Hours it takes<input data-k="hours" type="number" min="0.5" step="0.5" inputmode="decimal"></label></div>'
+      + '<label>What\'s included<input data-k="includes" placeholder="Vacuum, wipe down, windows, tire shine"></label>'
+      + '<button class="remove" type="button">Remove this service</button>';
+    if (ex) ["name", "price", "hours"].forEach((k, i) => s.querySelector('[data-k="' + k + '"]').placeholder = ex[i]);
+    s.querySelector(".remove").onclick = () => s.remove();
+    $("svcs").appendChild(s);
+  }
+  EXAMPLES.forEach(addService);
+  $("addSvc").onclick = () => addService();
+
+  function say(text, bad) { $("msg").textContent = text; $("msg").className = "msg" + (bad ? " err" : ""); }
+
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const v = n => (f.elements[n].value || "").trim();
+    const services = [...document.querySelectorAll(".svc")].map(s => {
+      const g = k => s.querySelector('[data-k="' + k + '"]').value.trim();
+      return { name: g("name"), price: g("price"), hours: g("hours"), includes: g("includes") };
+    }).filter(s => s.name);
+    const hours = [...document.querySelectorAll(".day")].filter(r => r.querySelector("input[type=checkbox]").checked)
+      .map(r => { const t = r.querySelectorAll("input[type=time]"); return { weekday: +r.dataset.day, open: t[0].value, close: t[1].value }; });
+
+    if (!v("business_name") || !v("owner_name")) return say("Please add your business name and your name.", true);
+    if (v("owner_phone").replace(/\D/g, "").length < 10) return say("Please add your cell phone with area code.", true);
+    if (!services.length) return say("Please add at least one service.", true);
+    if (!f.elements.sms_consent.checked) return say("Please tick the box agreeing to texts, so we can send you booking requests.", true);
+
+    const row = {
+      business_name: v("business_name"), owner_name: v("owner_name"), owner_phone: v("owner_phone"), email: v("email") || null,
+      details: {
+        service_mode: f.elements.service_mode.value, service_area: v("service_area"), shop_address: v("shop_address"),
+        hours, after_hours_ok: f.elements.after_hours_ok.checked, services,
+        discount_policy: f.elements.discount_policy.value, max_discount: v("max_discount"),
+        review_link: v("review_link"), ai_notes: v("ai_notes"), current_booking: v("current_booking"),
+        sms_consent_at: new Date().toISOString(),
+      },
+    };
+    $("go").disabled = true; say("Sending…");
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify(row),
+      });
+      if (!res.ok) throw new Error(res.status);
+      f.hidden = true; $("done").hidden = false; scrollTo(0, 0);
+    } catch (err) {
+      $("go").disabled = false;
+      say("That didn't go through. Check your connection and try again, or email itgo.ai@outlook.com.", true);
+    }
+  };
+})();
+</script>
+</body>
+</html>
