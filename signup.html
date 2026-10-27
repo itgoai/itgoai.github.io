@@ -76,7 +76,7 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
 
 <fieldset>
 <legend>Services and prices</legend>
-<p class="hint">List what you offer and your normal starting price. "What's included" helps the assistant answer questions.</p>
+<p class="hint">List what you offer and your normal starting price. "What's included" helps the assistant answer questions. Add extras like pet hair removal too and tick "Add-on": the assistant suggests them when they fit, which raises your average ticket.</p>
 <div id="svcs"></div>
 <button class="add" type="button" id="addSvc">+ Add another service</button>
 </fieldset>
@@ -88,6 +88,15 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
 <label class="choice"><input type="radio" name="discount_policy" value="never"> Never discount, offer a cheaper service instead</label>
 <label class="choice"><input type="radio" name="discount_policy" value="allowed"> The assistant can take off up to a set amount</label>
 <label>Most it can take off ($)<small>Only used with the last option.</small><input name="max_discount" type="number" min="0" step="5" inputmode="numeric" placeholder="20"></label>
+</fieldset>
+
+<fieldset>
+<legend>Bring in more jobs</legend>
+<label>Text past customers to come back after<small>A friendly "ready for another detail?" text, once, after their last job.</small>
+<select name="rebook_weeks"><option value="4">4 weeks</option><option value="6" selected>6 weeks</option><option value="8">8 weeks</option><option value="12">12 weeks</option><option value="0">Don't send these</option></select></label>
+<p class="hint" style="margin-bottom:10px">When a customer calls your ItGo number:</p>
+<label class="choice"><input type="radio" name="calls" value="ring" checked> Ring my cell first. If I don't answer, text them right away so they don't call someone else.</label>
+<label class="choice"><input type="radio" name="calls" value="text"> Don't ring me, just text them back right away.</label>
 </fieldset>
 
 <fieldset>
@@ -137,7 +146,8 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
   const EXAMPLES = [
     ["Exterior wash & wax", "75", "1.5", "Hand wash, wheels and tires, spray wax, windows"],
     ["Interior detail", "150", "2.5", "Vacuum, seats and carpets shampooed, dash and doors, windows"],
-    ["Full detail", "225", "4", "Interior detail plus exterior wash, clay bar and wax"]];
+    ["Full detail", "225", "4", "Interior detail plus exterior wash, clay bar and wax"],
+    ["Pet hair removal", "40", "0.5", "Deep removal of embedded pet hair", true]];
   function addService(ex) {
     const s = document.createElement("div");
     s.className = "svc";
@@ -146,8 +156,10 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
       + '<label>Price ($)<input data-k="price" type="number" min="0" step="5" inputmode="numeric"></label>'
       + '<label>Hours it takes<input data-k="hours" type="number" min="0.5" step="0.5" inputmode="decimal"></label></div>'
       + '<label>What\'s included<input data-k="includes"></label>'
+      + '<label class="choice"><input type="checkbox" data-k="addon"> Add-on (added to another service, like pet hair removal)</label>'
       + '<button class="remove" type="button">Remove this service</button>';
     if (ex) ["name", "price", "hours", "includes"].forEach((k, i) => s.querySelector('[data-k="' + k + '"]').placeholder = ex[i]);
+    if (ex && ex[4]) s.querySelector('[data-k="addon"]').checked = true;
     s.querySelector(".remove").onclick = () => s.remove();
     $("svcs").appendChild(s);
   }
@@ -161,7 +173,8 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
     const v = n => (f.elements[n].value || "").trim();
     const services = [...document.querySelectorAll(".svc")].map(s => {
       const g = k => s.querySelector('[data-k="' + k + '"]').value.trim();
-      return { name: g("name"), price: g("price"), hours: g("hours"), includes: g("includes") };
+      return { name: g("name"), price: g("price"), hours: g("hours"), includes: g("includes"),
+        addon: s.querySelector('[data-k="addon"]').checked };
     }).filter(s => s.name);
     const hours = [...document.querySelectorAll(".day")].filter(r => r.querySelector("input[type=checkbox]").checked)
       .map(r => { const t = r.querySelectorAll("input[type=time]"); return { weekday: +r.dataset.day, open: t[0].value, close: t[1].value }; });
@@ -177,6 +190,7 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
         service_mode: f.elements.service_mode.value, service_area: v("service_area"), shop_address: v("shop_address"),
         hours, after_hours_ok: f.elements.after_hours_ok.checked, services,
         discount_policy: f.elements.discount_policy.value, max_discount: v("max_discount"),
+        rebook_weeks: Number(f.elements.rebook_weeks.value), ring_owner: f.elements.calls.value === "ring",
         review_link: v("review_link"), ai_notes: v("ai_notes"), current_booking: v("current_booking"),
         sms_consent_at: new Date().toISOString(),
       },
