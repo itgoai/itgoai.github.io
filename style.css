@@ -1,0 +1,32 @@
+:root{--bg:#f6f7f9;--card:#fff;--ink:#14212e;--muted:#55636f;--line:#dde3e8;--accent:#e08a1e;--deep:#14212e;
+--display:"Archivo","Arial Black",system-ui,sans-serif;--body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0e151c;--card:#17212b;--ink:#eef2f6;--muted:#9fadba;--line:#2a3744;--accent:#f2a33b;--deep:#060b10;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 var(--body)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+header{background:var(--deep);color:#eef2f6}
+header .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:16px;flex-wrap:wrap}
+.logo{font:800 24px var(--display);color:#eef2f6;text-decoration:none}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:18px;font-size:16px}
+nav a{color:#c9d3dc;text-decoration:none}
+nav a:hover,nav a:focus-visible{color:#fff;text-decoration:underline}
+.hero{background:var(--deep);color:#eef2f6;padding-block:28px 56px}
+.hero h1{font:800 clamp(32px,6vw,52px)/1.08 var(--display);margin:0 0 16px;max-width:16ch;text-wrap:balance}
+.hero p{font-size:20px;color:#c9d3dc;max-width:58ch;margin:0}
+main{padding-block:40px 56px}
+h2{font:800 26px/1.2 var(--display);margin:40px 0 12px;text-wrap:balance}
+h3{font-size:19px;margin:24px 0 6px}
+p,li{max-width:68ch}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.step b{display:block;font:800 18px var(--display);margin-bottom:6px}
+.step p{margin:0;color:var(--muted);font-size:16px}
+.sms{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+.sms p{margin:0 0 10px}
+.sms p:last-child{margin:0}
+.muted{color:var(--muted)}
+a{color:inherit}
+footer{border-top:1px solid var(--line);padding-block:24px;color:var(--muted);font-size:15px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media (max-width:680px){.steps{grid-template-columns:1fr}}
