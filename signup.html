@@ -55,7 +55,22 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
 <label>Your name<input name="owner_name" required autocomplete="name"></label>
 <label>Your cell phone<small>Booking requests are texted here for you to approve.</small><input name="owner_phone" required type="tel" autocomplete="tel" placeholder="(555) 555-0100"></label>
 </div>
-<label>Email<input name="email" type="email" autocomplete="email"></label>
+<label>Email<small>You'll sign in to your ItGo app with this.</small><input name="email" type="email" required autocomplete="email"></label>
+<p class="hint" style="margin:16px 0 10px">What do you detail?</p>
+<label class="choice"><input type="radio" name="detail_type" value="cars" checked> Cars and trucks</label>
+<label class="choice"><input type="radio" name="detail_type" value="boats"> Boats</label>
+<label class="choice"><input type="radio" name="detail_type" value="both"> Both</label>
+</fieldset>
+
+<fieldset>
+<legend>For your texting number</legend>
+<p class="hint">Phone carriers check these before they let a business text customers. Use the details exactly as they appear on your business registration or IRS letter. Leave anything blank you don't have.</p>
+<label>Legal business name<small>For example "Mike's Mobile Detailing LLC". If you're not registered, your own full name.</small><input name="legal_name" autocomplete="organization"></label>
+<div class="two">
+<label>EIN (tax ID)<small>9 digits, from your IRS letter. Not your Social Security number.</small><input name="ein" inputmode="numeric" placeholder="12-3456789"></label>
+<label>Website<small>Facebook or Google page is fine if you have no site.</small><input name="website" type="url" inputmode="url" placeholder="https://"></label>
+</div>
+<label>Business mailing address<small>Street, city, state and ZIP.</small><input name="business_address" autocomplete="street-address"></label>
 </fieldset>
 
 <fieldset>
@@ -76,7 +91,7 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
 
 <fieldset>
 <legend>Services and prices</legend>
-<p class="hint">List what you offer and your normal starting price. "What's included" helps the assistant answer questions. Add extras like pet hair removal too and tick "Add-on": the assistant suggests them when they fit, which raises your average ticket.</p>
+<p class="hint">List what you offer and your normal starting price. "What's included" helps the assistant answer questions. Add extras like pet hair removal or teak cleaning too and tick "Add-on": the assistant suggests them when they fit, which raises your average ticket. If you price boats by the foot, say so under "What should the assistant know?" below.</p>
 <div id="svcs"></div>
 <button class="add" type="button" id="addSvc">+ Add another service</button>
 </fieldset>
@@ -102,7 +117,7 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
 <fieldset>
 <legend>Anything else</legend>
 <label>Google review link<small>Sent to customers after each job. In Google Maps, open your business, tap "Ask for reviews" or "Share review form", and copy the link. Leave it blank if you're not sure.</small><input name="review_link" type="url" inputmode="url" placeholder="https://g.page/r/..."></label>
-<label>What should the assistant know?<small>Water and power, payment methods, deposits, extra charges for pet hair or heavy dirt, things you don't do.</small><textarea name="ai_notes" placeholder="We bring our own water and power. Pet hair is $25 extra. Cash, card or Venmo after the job."></textarea></label>
+<label>What should the assistant know?<small>Water and power, payment methods, deposits, pricing by boat length, extra charges for pet hair or heavy dirt, things you don't do.</small><textarea name="ai_notes" placeholder="We bring our own water and power. Pet hair is $25 extra. Cash, card or Venmo after the job."></textarea></label>
 <label>How do customers book with you now?<textarea name="current_booking" style="min-height:60px" placeholder="Texts and Instagram DMs, I write it in my calendar"></textarea></label>
 </fieldset>
 
@@ -143,11 +158,17 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
     $("days").appendChild(row);
   });
 
-  const EXAMPLES = [
+  const CAR = [
     ["Exterior wash & wax", "75", "1.5", "Hand wash, wheels and tires, spray wax, windows"],
     ["Interior detail", "150", "2.5", "Vacuum, seats and carpets shampooed, dash and doors, windows"],
     ["Full detail", "225", "4", "Interior detail plus exterior wash, clay bar and wax"],
     ["Pet hair removal", "40", "0.5", "Deep removal of embedded pet hair", true]];
+  const BOAT = [
+    ["Boat wash", "180", "2", "Freshwater wash top to bottom, hull sides, vinyl and stainless wiped"],
+    ["Boat wash & wax", "450", "5", "Boat wash plus hand-applied marine wax on hull and topsides"],
+    ["Oxidation removal", "950", "8", "Compound and polish to remove chalky oxidation, then wax"],
+    ["Teak cleaning", "120", "1", "Two-part teak clean and brighten", true]];
+  const EXAMPLES = { cars: CAR, boats: BOAT, both: [CAR[2], BOAT[1], CAR[1], BOAT[3]] };
   function addService(ex) {
     const s = document.createElement("div");
     s.className = "svc";
@@ -163,7 +184,13 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
     s.querySelector(".remove").onclick = () => s.remove();
     $("svcs").appendChild(s);
   }
-  EXAMPLES.forEach(addService);
+  EXAMPLES.cars.forEach(addService);
+  // Switching what they detail swaps the example services, as long as they haven't typed any yet
+  f.querySelectorAll('[name="detail_type"]').forEach(r => r.onchange = () => {
+    if ([...document.querySelectorAll(".svc input:not([type=checkbox])")].some(i => i.value.trim())) return;
+    $("svcs").innerHTML = "";
+    EXAMPLES[r.value].forEach(addService);
+  });
   $("addSvc").onclick = () => addService();
 
   function say(text, bad) { $("msg").textContent = text; $("msg").className = "msg" + (bad ? " err" : ""); }
@@ -180,6 +207,8 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
       .map(r => { const t = r.querySelectorAll("input[type=time]"); return { weekday: +r.dataset.day, open: t[0].value, close: t[1].value }; });
 
     if (!v("business_name") || !v("owner_name")) return say("Please add your business name and your name.", true);
+    if (!/^\S+@\S+\.\S+$/.test(v("email"))) return say("Please add your email. You'll use it to sign in to your app.", true);
+    if (v("ein") && v("ein").replace(/\D/g, "").length !== 9) return say("An EIN has 9 digits. Leave it blank if you don't have one.", true);
     if (v("owner_phone").replace(/\D/g, "").length < 10) return say("Please add your cell phone with area code.", true);
     if (!services.length) return say("Please add at least one service.", true);
     if (!f.elements.sms_consent.checked) return say("Please tick the box agreeing to texts, so we can send you booking requests.", true);
@@ -187,6 +216,8 @@ button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:10px;p
     const row = {
       business_name: v("business_name"), owner_name: v("owner_name"), owner_phone: v("owner_phone"), email: v("email") || null,
       details: {
+        detail_type: f.elements.detail_type.value, legal_name: v("legal_name"), ein: v("ein").replace(/\D/g, ""),
+        website: v("website"), business_address: v("business_address"),
         service_mode: f.elements.service_mode.value, service_area: v("service_area"), shop_address: v("shop_address"),
         hours, after_hours_ok: f.elements.after_hours_ok.checked, services,
         discount_policy: f.elements.discount_policy.value, max_discount: v("max_discount"),
