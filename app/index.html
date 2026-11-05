@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#14212e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ItGo">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>ItGo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="../style.css">
+<style>
+/* Owner app: Today, Messages, Jobs, Settings. Phone first, works on a computer too. */
+:root{--good:#1d7a4a;--good-bg:#e3f3ea;--pend:#8a4f00;--pend-bg:#fdf0db;--bad:#a3271f;--bad-bg:#fbe4e1;--bubble:#e9edf1;--outb:#1f3a52;--tabh:62px}
+@media (prefers-color-scheme:dark){:root{--good:#6fd39c;--good-bg:#16342a;--pend:#f5c169;--pend-bg:#3a2c12;--bad:#ff8f84;--bad-bg:#3d1c19;--bubble:#243140;--outb:#2c5277}}
+body{font-size:17px;padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom))}
+body.out{padding-bottom:0}
+.bar{background:var(--deep);color:#eef2f6;padding-top:env(safe-area-inset-top);position:sticky;top:0;z-index:5}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:54px;max-width:760px}
+.bar .biz{font-weight:700;color:#c9d3dc;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main.wrap{max-width:760px;padding-block:20px 28px}
+h1.page{font:800 26px/1.15 var(--display);margin:0 0 4px}
+.date{color:var(--muted);margin:0 0 6px}
+h2.sec{font:800 18px/1.2 var(--display);margin:26px 0 10px;display:flex;align-items:center;gap:8px}
+.count{font:700 13px/1.5 var(--body);background:var(--accent);color:#14212e;border-radius:99px;padding:0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.stack>*+*{margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.top b{font-size:18px;min-width:0;overflow-wrap:anywhere}
+.price{font-weight:700;font-variant-numeric:tabular-nums}
+.sub{color:var(--muted);font-size:15px;margin:2px 0 0}
+p.body{margin:6px 0 0}
+.note{background:var(--pend-bg);color:var(--pend);border-radius:10px;padding:8px 12px;margin:10px 0 0;font-size:15px;font-weight:700}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+button{font:inherit;cursor:pointer;color:inherit}
+.b{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;font-size:16px;border-radius:10px;padding:9px 16px;min-height:44px;text-decoration:none}
+.b.go{background:var(--good);border-color:var(--good);color:#fff}
+.b.main{background:var(--accent);border-color:var(--accent);color:#14212e}
+.b.no{color:var(--bad)}
+.b.link{border:0;background:none;color:var(--muted);padding:9px 6px;text-decoration:underline;font-weight:400}
+.b:disabled{opacity:.5;cursor:default}
+.b.wide{width:100%}
+@media (prefers-color-scheme:dark){.b.go{color:#0e151c}}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:flex;gap:12px;align-items:center;padding:12px 16px;border:0;border-top:1px solid var(--line);width:100%;text-align:left;background:none;min-height:60px}
+.row:first-child{border-top:0}
+button.row:hover{background:var(--bg)}
+.row .time{font-weight:700;font-variant-numeric:tabular-nums;width:78px;flex:none}
+.row .mid{flex:1;min-width:0}
+.row .mid b,.row .mid span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .mid span{color:var(--muted);font-size:15px}
+.row .end{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.row .ago{color:var(--muted);font-size:14px}
+.pill{font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.pill.booked{background:var(--good-bg);color:var(--good)}
+.pill.pending{background:var(--pend-bg);color:var(--pend)}
+.pill.canceled{background:var(--bad-bg);color:var(--bad)}
+.pill.done{background:var(--bubble);color:var(--muted)}
+.empty{color:var(--muted);margin:0}
+.list .empty{padding:14px 16px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.stat .t{color:var(--muted);font-size:14px;margin:0}
+.stat .v{font-weight:700;font-size:24px;margin:2px 0 0;font-variant-numeric:tabular-nums}
+.stat .d{color:var(--muted);font-size:14px;margin:0}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--bubble);display:grid;place-items:center;font-weight:700;flex:none}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.daygroup{font-weight:700;color:var(--muted);font-size:15px;margin:18px 0 6px}
+.daygroup:first-child{margin-top:0}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;margin:8px 0 14px}
+.seg button{border:0;background:none;color:var(--muted);font-weight:700;font-size:15px;padding:8px 16px;border-radius:9px;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.sample{background:var(--pend-bg);color:var(--pend);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-weight:700;font-size:15px}
+/* Bottom tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.tabs[hidden]{display:none}
+.tabs .tabin{display:flex;width:100%;max-width:560px}
+.tabs button{flex:1;border:0;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;font-size:12px;font-weight:700;position:relative;min-height:var(--tabh)}
+.tabs button[aria-current="page"]{color:var(--ink)}
+.tabs button[aria-current="page"] svg{stroke:var(--accent)}
+.tabs svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tabs .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--accent);color:#14212e;border-radius:99px;font-size:11px;line-height:18px;padding:0 6px;min-width:18px}
+/* Chat */
+.chathead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.chathead .mid{flex:1;min-width:0}
+.chathead h1{font:800 22px/1.2 var(--display);margin:0;overflow-wrap:anywhere}
+.back{border:0;background:none;color:var(--muted);font-weight:700;padding:8px 8px 8px 0;min-height:44px}
+.handoff{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;border-radius:12px;padding:8px 8px 8px 14px;margin-bottom:12px;font-size:15px;font-weight:700}
+.handoff.ai{background:var(--good-bg);color:var(--good)}
+.handoff.me{background:var(--pend-bg);color:var(--pend)}
+.handoff .b{min-height:38px;padding:6px 12px;font-size:15px}
+.nextjob{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:15px}
+.bubbles{display:flex;flex-direction:column;gap:4px}
+.bub{max-width:82%;padding:9px 13px;border-radius:18px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.4}
+.bub.cust{align-self:flex-start;background:var(--bubble);border-bottom-left-radius:5px}
+.bub.ours{align-self:flex-end;background:var(--outb);color:#eef2f6;border-bottom-right-radius:5px}
+.by{font-size:12px;color:var(--muted);align-self:flex-end;margin:0 4px 8px}
+.by.cust{align-self:flex-start}
+.daysep{text-align:center;color:var(--muted);font-size:13px;margin:12px 0 6px}
+.compose{position:sticky;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));background:var(--bg);padding:10px 0 4px;display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+.compose textarea{flex:1;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--card);color:var(--ink);resize:none;min-height:46px;max-height:150px}
+/* Forms */
+.f{display:block;margin-top:16px;font-weight:700;font-size:15px}
+.f:first-child{margin-top:0}
+.f small{display:block;font-weight:400;color:var(--muted)}
+.in{display:block;width:100%;margin-top:6px;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);color:var(--ink);min-height:46px}
+textarea.in{min-height:90px;resize:vertical}
+.check{display:flex;gap:12px;align-items:flex-start;margin-top:16px;font-size:16px}
+.check input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--good);flex:none}
+.check small{display:block;color:var(--muted);font-size:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hrow{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.hrow:first-child{border-top:0}
+.hrow label{display:flex;gap:8px;align-items:center;font-weight:700;min-width:82px}
+.hrow input[type=checkbox]{width:22px;height:22px;accent-color:var(--good)}
+.hrow .in{margin:0}
+.hrow .closed{grid-column:2/-1;color:var(--muted)}
+.savebar{position:sticky;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));background:var(--bg);padding:12px 0 6px;margin-top:12px}
+/* Bottom sheet */
+dialog.sheet{border:0;border-radius:20px 20px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));width:100%;max-width:640px;margin:auto auto 0;background:var(--card);color:var(--ink);max-height:90vh;overflow:auto}
+dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
+@media (min-width:700px){dialog.sheet{border-radius:20px;margin:auto}}
+.sheet h2{font:800 22px/1.2 var(--display);margin:0 0 4px}
+.facts{margin:16px 0 0;display:grid;gap:10px}
+.facts div{display:grid;grid-template-columns:130px 1fr;gap:10px}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;overflow-wrap:anywhere}
+#toast{position:fixed;left:50%;bottom:calc(var(--tabh) + 18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;width:max-content;max-width:90vw;z-index:20;text-align:center}
+#toast.show{opacity:1}
+.login{max-width:440px;margin:24px auto 0}
+.login .card{padding:24px}
+.login form{margin-top:18px}
+.msg{padding:40px 0;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="bar"><div class="wrap"><span class="logo">ItGo<span>.ai</span></span><span class="biz" id="bizname"></span></div></header>
+<main class="wrap" id="view"><p class="msg">Loading…</p></main>
+<nav class="tabs" id="tabs" hidden aria-label="Sections"><div class="tabin">
+  <button type="button" data-tab="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Today<span class="badge" hidden></span></button>
+  <button type="button" data-tab="messages"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Messages<span class="badge" hidden></span></button>
+  <button type="button" data-tab="jobs"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Jobs</button>
+  <button type="button" data-tab="settings"><svg viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Settings</button>
+</div></nav>
+<dialog class="sheet" id="sheet"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+  const SB_URL = "https://htlssigvpaacxenogkog.supabase.co";
+  const SB_KEY = "sb_publishable_imCpDD2KiLuRlwI2OGmSww_IVZZ8fS7";
+  const FN = SB_URL + "/functions/v1/sms-webhook?app=1";
+  const sample = new URLSearchParams(location.search).has("sample");
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const money = n => "$" + (Number(n) || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+  const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+  let sb = null, S = null, tab = "today", chatId = null, jobsView = "upcoming", draft = null, composeText = "", busy = false;
+
+  // ---------- Time, always shown in the business's time zone ----------
+  const f = (d, o) => new Intl.DateTimeFormat("en-US", { timeZone: S.biz.timezone, ...o }).format(new Date(d));
+  const dayKey = d => new Intl.DateTimeFormat("en-CA", { timeZone: S.biz.timezone }).format(new Date(d));
+  const clock = d => f(d, { hour: "numeric", minute: "2-digit" });
+  function dayLabel(d) {
+    const k = dayKey(d), now = Date.now();
+    if (k === dayKey(now)) return "Today";
+    if (k === dayKey(now + 864e5)) return "Tomorrow";
+    if (k === dayKey(now - 864e5)) return "Yesterday";
+    return f(d, { weekday: "short", month: "short", day: "numeric" });
+  }
+  const whenText = d => dayLabel(d) + " · " + clock(d);
+  function ago(d) {
+    const m = (Date.now() - new Date(d)) / 6e4;
+    if (m < 1) return "now";
+    if (m < 60) return Math.round(m) + "m";
+    if (dayKey(d) === dayKey(Date.now())) return clock(d);
+    if (m < 6 * 1440) return f(d, { weekday: "short" });
+    return f(d, { month: "short", day: "numeric" });
+  }
+  const byStart = (a, b) => a.starts_at < b.starts_at ? -1 : 1;
+
+  // ---------- People ----------
+  const cust = id => S.customers[id] || { id, name: "", phone: "" };
+  const prettyPhone = p => { const d = String(p || "").replace(/\D/g, "").replace(/^1(?=\d{10}$)/, ""); return d.length === 10 ? "(" + d.slice(0, 3) + ") " + d.slice(3, 6) + "-" + d.slice(6) : String(p || ""); };
+  const who = c => c.name || prettyPhone(c.phone) || "Customer";
+  const first = c => (c.name || "").split(" ")[0] || "them";
+  const BY = { ai: "Assistant", owner: "You", reminder: "Reminder", review: "Review request", rebook: "Come-back text", missed_call: "Missed-call text" };
+  const ALERT = { price_request: "Wants a better price", lost_lead: "Didn't book", special_request: "Special request", question: "Has a question", upset: "Unhappy customer" };
+
+  // ---------- Sample business (?sample=1): made-up data, nothing is saved or texted ----------
+  function sampleState() {
+    const at = (days, h, m = 0) => { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(h, m, 0, 0); return d.toISOString(); };
+    const minsAgo = m => new Date(Date.now() - m * 6e4).toISOString();
+    let n = 0; const id = () => "s" + (++n);
+    const biz = {
+      id: "b1", name: "Gulf Coast Boat Detailing", timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      owner_phone: "+18505550100", twilio_number: "+18505550111", review_link: "https://g.page/r/gulf-coast-boat-detailing/review",
+      service_mode: "mobile", service_area: "Marinas and boat ramps in Pensacola, Pensacola Beach, Gulf Breeze and Perdido Key",
+      discount_policy: "ask", max_discount: 0, after_hours_ok: true, auto_confirm: false, ring_owner: true, rebook_days: 42,
+      ai_notes: "Prices are for boats up to 26 ft. Over 26 ft, add $15 per foot. We need fresh water and power at the slip. Payment by card or Venmo after the job.",
+    };
+    const services = [
+      ["Maintenance Wash", 180, 120, "Freshwater wash top to bottom, hull sides, windows and stainless wiped down, vinyl wiped.", false],
+      ["Wash & Wax", 450, 300, "Everything in the Maintenance Wash plus hand-applied marine wax on the hull and topsides.", false],
+      ["Oxidation Removal", 950, 480, "Machine compound and polish to remove chalky oxidation, then wax.", false],
+      ["Interior Detail", 250, 180, "Vinyl seats cleaned and conditioned, snap-in carpet shampooed, cabin wiped down, mildew treated.", false],
+      ["Ceramic Coating", 2200, 720, "Full polish, then a marine ceramic coating on the gelcoat that lasts about 2 years.", false],
+      ["Teak Cleaning", 120, 60, "Two-part teak clean and brighten.", true],
+      ["Waterline Stain Removal", 100, 45, "Removes the brown waterline and scum line.", true],
+      ["Metal Polish", 80, 45, "Rails, cleats and stainless polished.", true],
+    ].map(([name, price, duration_minutes, includes, is_addon]) => ({ id: id(), name, price, duration_minutes, includes, is_addon, active: true }));
+    const hours = [1, 2, 3, 4, 5, 6].map(weekday => ({ weekday, open_time: weekday === 6 ? "08:00" : "07:00", close_time: weekday === 6 ? "14:00" : "17:00" }));
+    const customers = {};
+    [
+      ["c1", "Mark Ellison", "+18505550142", "24' Sea Ray Sundancer", "Palafox Pier Marina, slip B12"],
+      ["c2", "Kristen Holt", "+18505550178", "32' Grady-White Canyon", "Pensacola Beach Marina, dock 3"],
+      ["c3", "Dale Simmons", "+18505550119", "21' Key West center console", "On the trailer at 418 Bayou Blvd"],
+      ["c4", "Tasha Monroe", "+18505550163", "38' Formula", "Palafox Pier Marina, slip D4"],
+      ["c5", "Ray Castillo", "+18505550191", "19' Bayliner", "Shoreline Park boat ramp"],
+      ["c6", "Jen Whitaker", "+18505550127", "26' Pursuit", "Bahia Mar Marina, slip 22", true],
+      ["c7", "", "+18505550155", "", ""],
+    ].forEach(([cid, name, phone, vehicle, address, paused]) => customers[cid] = { id: cid, name, phone, vehicle, address, ai_paused: !!paused });
+    const J = (customer_id, service_name, price, starts_at, hrs, status, extra = {}) => ({
+      id: id(), customer_id, service_name, price, starts_at, ends_at: new Date(new Date(starts_at).getTime() + hrs * 36e5).toISOString(),
+      status, source: "sms", customer_offer: null, notes: null, created_at: minsAgo(4320), ...extra,
+    });
+    const jobs = [
+      J("c2", "Wash & Wax + Teak Cleaning", 650, at(2, 9), 6, "pending", { created_at: minsAgo(38) }),
+      J("c5", "Interior Detail", 250, at(3, 10), 3, "pending", { customer_offer: 200, created_at: minsAgo(95) }),
+      J("c1", "Maintenance Wash", 180, at(0, 8), 2, "booked", { notes: "Gate code 4410" }),
+      J("c6", "Wash & Wax", 520, at(0, 13), 5, "booked"),
+      J("c4", "Oxidation Removal", 1400, at(1, 8), 8, "booked"),
+      J("c3", "Maintenance Wash", 150, at(4, 9), 2, "booked"),
+      J("c6", "Interior Detail", 250, at(9, 9), 3, "booked"),
+      J("c2", "Maintenance Wash", 200, at(-1, 10), 2, "booked"),
+      J("c4", "Interior Detail", 350, at(-2, 9), 3, "done"),
+      J("c1", "Wash & Wax", 480, at(-5, 8), 5, "done"),
+      J("c3", "Maintenance Wash", 150, at(-6, 9), 2, "canceled"),
+      J("c6", "Ceramic Coating", 2200, at(-9, 7), 12, "done"),
+      J("c3", "Wash & Wax", 420, at(-12, 9), 5, "done"),
+    ];
+    const messages = [];
+    const M = (customer_id, mins, direction, sent_by, body) => messages.push({ id: id(), customer_id, direction, sent_by, body, created_at: minsAgo(mins) });
+    M("c3", 60 * 24 * 11, "out", "review", "Thanks for choosing Gulf Coast Boat Detailing, Dale! If you have a minute, a quick review helps us a ton: https://g.page/r/gulf-coast-boat-detailing/review");
+    M("c3", 60 * 24 * 11 - 40, "in", "customer", "Done! Boat looks brand new");
+    M("c3", 60 * 24 * 11 - 39, "out", "ai", "Thank you Dale, that means a lot! See you next time.");
+    M("c4", 60 * 26, "out", "owner", "Good news Tasha, you're all set! Oxidation Removal on " + whenAt(at(1, 8)) + " for $1,400. See you then! Just text here if anything changes.");
+    M("c1", 60 * 20, "out", "reminder", "Hi Mark, quick reminder: your Maintenance Wash is tomorrow at 8:00 AM at Palafox Pier Marina, slip B12. If anything changes, just text us here.");
+    M("c1", 60 * 19, "in", "customer", "Sounds good. Gate code is 4410");
+    M("c1", 60 * 19 - 1, "out", "ai", "Thanks Mark, got it. See you at 8!");
+    M("c6", 60 * 5, "in", "customer", "Can you guys come at 1 instead of 12 today?");
+    M("c6", 60 * 4, "out", "owner", "Yep 1 works, see you then");
+    M("c6", 22, "in", "customer", "Thanks!! Also there's a weird smell coming from the bilge, can you take a look while you're there?");
+    M("c5", 100, "in", "customer", "How much for an interior on a 19 ft bayliner");
+    M("c5", 99, "out", "ai", "Hi Ray! An Interior Detail is $250. That covers the seats cleaned and conditioned, the carpet shampooed and mildew treated. Want me to find you a time?");
+    M("c5", 97, "in", "customer", "Could you do 200? Its mostly just the seats");
+    M("c5", 96, "out", "ai", "Let me check with the team on that and get right back to you. I've held Tuesday at 10:00 AM for you in the meantime.");
+    M("c7", 75, "out", "missed_call", "Hi, it's Gulf Coast Boat Detailing! Sorry we missed your call, we're probably out on a boat. What can we help you with? Reply STOP to opt out.");
+    M("c7", 70, "in", "customer", "Hey yes do you all do pontoons? Waterline is really stained");
+    M("c7", 69, "out", "ai", "We do work on pontoons! Let me check with the team about the waterline stains and get right back to you.");
+    M("c2", 50, "in", "customer", "Hey do you guys do teak? Need my Grady washed and waxed before we take it out next weekend");
+    M("c2", 49, "out", "ai", "Hi Kristen! Yes, we clean and brighten teak as an add-on for $120. What size is the boat, and where is it kept?");
+    M("c2", 45, "in", "customer", "32 ft canyon, dock 3 at pensacola beach marina");
+    M("c2", 44, "out", "ai", "Perfect. A Wash & Wax for a 32' boat is $530, and teak adds $120, so $650 total. I have " + whenAt(at(2, 9)) + " or the next morning at 8:00 AM. Which works better?");
+    M("c2", 40, "in", "customer", "The first one");
+    M("c2", 39, "out", "ai", "Got it! I've sent that time over to be confirmed, and you'll get a text as soon as it's locked in.");
+    const alerts = [
+      { id: id(), customer_id: "c5", kind: "price_request", summary: "Asked for the Interior Detail at $200 instead of $250. 19' Bayliner, mostly the seats.", created_at: minsAgo(96) },
+      { id: id(), customer_id: "c7", kind: "question", summary: "Asked if we can remove heavy waterline stains on a pontoon.", created_at: minsAgo(69) },
+    ];
+    return { biz, services, hours, customers, jobs, messages, alerts };
+  }
+  function whenAt(iso) {
+    return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+  }
+
+  // ---------- Loading real data (row security means owners only ever see their own business) ----------
+  async function load() {
+    const { data: bizId, error } = await sb.rpc("claim_my_business");
+    if (error) throw error;
+    if (!bizId) return false;
+    const since = new Date(Date.now() - 60 * 864e5).toISOString();
+    const [biz, services, hours, jobs, messages, customers, alerts] = await Promise.all([
+      sb.from("businesses").select("*").eq("id", bizId).single(),
+      sb.from("services").select("*").eq("business_id", bizId).order("is_addon").order("price"),
+      sb.from("working_hours").select("*").eq("business_id", bizId),
+      sb.from("jobs").select("*").eq("business_id", bizId).gte("starts_at", since).order("starts_at").limit(1000),
+      sb.from("messages").select("id, customer_id, direction, body, sent_by, created_at").eq("business_id", bizId)
+        .order("created_at", { ascending: false }).limit(1000),
+      sb.from("customers").select("*").eq("business_id", bizId).limit(5000),
+      sb.from("alerts").select("*").eq("business_id", bizId).eq("handled", false).order("created_at", { ascending: false }).limit(50),
+    ]);
+    for (const r of [biz, services, hours, jobs, messages, customers, alerts]) if (r.error) throw r.error;
+    const byId = {};
+    for (const c of customers.data) byId[c.id] = c;
+    S = { biz: biz.data, services: services.data, hours: hours.data, jobs: jobs.data, messages: messages.data, customers: byId, alerts: alerts.data };
+    return true;
+  }
+
+  // ---------- Actions ----------
+  async function act(name, p = {}, btn) {
+    if (busy) return;
+    busy = true; if (btn) btn.disabled = true;
+    try {
+      const msg = await (sample ? sampleAct : realAct)(name, p);
+      if (!sample) await load();
+      closeSheet(); render();
+      if (msg) toast(msg);
+    } catch (e) {
+      toast(e.message || "Something went wrong. Try again.");
+      if (btn) btn.disabled = false;
+    } finally { busy = false; }
+  }
+
+  function sampleAct(name, p) {
+    const j = p.job_id && S.jobs.find(x => x.id === p.job_id);
+    const c = j ? cust(j.customer_id) : p.customer_id ? cust(p.customer_id) : null;
+    const say = (body, by = "owner") => S.messages.push({ id: "m" + Math.random(), customer_id: c.id, direction: "out", sent_by: by, body, created_at: new Date().toISOString() });
+    if (name === "approve") {
+      j.price = j.customer_offer ?? j.price; j.status = "booked";
+      say("Good news " + first(c) + ", you're all set! " + j.service_name + " on " + whenAt(j.starts_at) + " for " + money(j.price) + ". See you then! Just text here if anything changes.");
+      return "Approved. " + first(c) + " got a confirmation text.";
+    }
+    if (name === "decline") {
+      j.status = "canceled";
+      say("Hey " + first(c) + ", we can't make that exact one work, but we'll reach out shortly to sort out something that does.");
+      return "Declined. We told " + first(c) + " you'll reach out.";
+    }
+    if (name === "cancel") {
+      j.status = "canceled";
+      if (p.notify) say("Hi " + first(c) + ", we've had to cancel your " + j.service_name + " on " + whenAt(j.starts_at) + ". Sorry about that! Text us here and we'll find a new time.");
+      return p.notify ? "Canceled. " + first(c) + " got a text." : "Canceled. No text was sent.";
+    }
+    if (name === "done") { j.status = "done"; return "Marked done."; }
+    if (name === "handled") { S.alerts = S.alerts.filter(a => a.id !== p.id); return "Marked handled."; }
+    if (name === "send") { say(p.body); c.ai_paused = true; return ""; }
+    if (name === "pause") { c.ai_paused = p.on; return p.on ? "You're handling this chat now." : "The assistant is answering again."; }
+    if (name === "saveService") {
+      const old = p.id && S.services.find(s => s.id === p.id);
+      if (old) Object.assign(old, p); else S.services.push({ ...p, id: "s" + Math.random() });
+      return "Service saved.";
+    }
+    if (name === "saveSettings") {
+      Object.assign(S.biz, p.biz);
+      S.hours = p.hours;
+      return "Saved.";
+    }
+  }
+
+  async function realAct(name, p) {
+    // These text the customer, so they go through ItGo's server
+    if (["approve", "decline", "cancel", "send"].includes(name)) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) throw new Error("Please sign in again.");
+      const res = await fetch(FN, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer " + session.access_token },
+        body: JSON.stringify({ action: name, ...p }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || "Couldn't do that right now. Try again.");
+      return body.message || "";
+    }
+    const check = r => { if (r.error) throw new Error(r.error.message); };
+    if (name === "done") { check(await sb.from("jobs").update({ status: "done" }).eq("id", p.job_id)); return "Marked done."; }
+    if (name === "handled") { check(await sb.from("alerts").update({ handled: true }).eq("id", p.id)); return "Marked handled."; }
+    if (name === "pause") {
+      check(await sb.from("customers").update({ ai_paused: p.on }).eq("id", p.customer_id));
+      return p.on ? "You're handling this chat now." : "The assistant is answering again.";
+    }
+    if (name === "saveService") {
+      const { id, ...row } = p;
+      check(id ? await sb.from("services").update(row).eq("id", id)
+               : await sb.from("services").insert({ ...row, business_id: S.biz.id }));
+      return "Service saved.";
+    }
+    if (name === "saveSettings") {
+      check(await sb.from("businesses").update(p.biz).eq("id", S.biz.id));
+      check(await sb.from("working_hours").delete().eq("business_id", S.biz.id));
+      if (p.hours.length) check(await sb.from("working_hours").insert(p.hours.map(h => ({ ...h, business_id: S.biz.id }))));
+      return "Saved.";
+    }
+  }
+
+  // ---------- Screens ----------
+  function convos() {
+    const by = {};
+    for (const m of S.messages) if (m.customer_id) (by[m.customer_id] ||= []).push(m);
+    return Object.entries(by).map(([cid, ms]) => {
+      const last = ms.reduce((a, b) => a.created_at > b.created_at ? a : b);
+      const c = cust(cid);
+      return { c, last, needsReply: !!c.ai_paused && last.direction === "in" };
+    }).sort((a, b) => a.last.created_at < b.last.created_at ? 1 : -1);
+  }
+
+  function pill(j) {
+    const now = Date.now(), start = new Date(j.starts_at), end = new Date(j.ends_at);
+    if (j.status === "pending") return '<span class="pill pending">Needs your OK</span>';
+    if (j.status === "canceled") return '<span class="pill canceled">Canceled</span>';
+    if (j.status === "done") return '<span class="pill done">Done</span>';
+    if (start <= now && end > now) return '<span class="pill booked">Happening now</span>';
+    if (end <= now) return '<span class="pill pending">Mark done?</span>';
+    return '<span class="pill booked">Confirmed</span>';
+  }
+
+  const jobRow = (j, label) => {
+    const c = cust(j.customer_id);
+    return '<button type="button" class="row" data-job="' + j.id + '"><span class="time">' + esc(label || clock(j.starts_at)) + '</span>' +
+      '<span class="mid"><b>' + esc(who(c)) + "</b><span>" + esc(j.service_name) + (c.address ? " · " + esc(c.address) : "") + "</span></span>" +
+      '<span class="end"><span class="price">' + money(j.price) + "</span>" + pill(j) + "</span></button>";
+  };
+
+  function requestCard(j) {
+    const c = cust(j.customer_id);
+    const offer = j.customer_offer != null && Number(j.customer_offer) !== Number(j.price);
+    return '<div class="card"><div class="top"><b>' + esc(who(c)) + '</b><span class="price">' + money(j.price) + "</span></div>" +
+      '<p class="sub">' + esc(j.service_name) + " · " + esc(whenText(j.starts_at)) + "</p>" +
+      (c.vehicle || c.address ? '<p class="sub">' + esc([c.vehicle, c.address].filter(Boolean).join(" · ")) + "</p>" : "") +
+      (offer ? '<p class="note">They asked for ' + money(j.customer_offer) + ". Approving books it at " + money(j.customer_offer) + ".</p>" : "") +
+      '<div class="btns"><button type="button" class="b go" data-act="approve" data-id="' + j.id + '">Approve</button>' +
+      '<button type="button" class="b no" data-act="decline" data-id="' + j.id + '">Decline</button>' +
+      '<button type="button" class="b" data-chat="' + j.customer_id + '">See chat</button></div></div>';
+  }
+
+  function alertCard(a) {
+    const c = cust(a.customer_id);
+    return '<div class="card"><div class="top"><b>' + esc(ALERT[a.kind] || "Heads up") + " · " + esc(who(c)) + '</b><span class="sub">' + esc(ago(a.created_at)) + "</span></div>" +
+      '<p class="body">' + esc(a.summary) + "</p>" +
+      '<div class="btns">' + (a.customer_id ? '<button type="button" class="b main" data-chat="' + a.customer_id + '">Open chat</button>' : "") +
+      (c.phone ? '<a class="b" href="tel:' + esc(c.phone) + '">Call</a>' : "") +
+      '<button type="button" class="b link" data-act="handled" data-id="' + a.id + '">Mark handled</button></div></div>';
+  }
+
+  function viewToday() {
+    const now = Date.now(), today = dayKey(now);
+    const hour = Number(f(now, { hour: "numeric", hourCycle: "h23" }));
+    const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    const pending = S.jobs.filter(j => j.status === "pending").sort(byStart);
+    const todays = S.jobs.filter(j => dayKey(j.starts_at) === today && j.status !== "canceled").sort(byStart);
+    const unfinished = S.jobs.filter(j => j.status === "booked" && dayKey(j.starts_at) < today).sort(byStart);
+    const coming = S.jobs.filter(j => j.status === "booked" && dayKey(j.starts_at) > today).sort(byStart);
+    const week = coming.filter(j => new Date(j.starts_at) < now + 7 * 864e5).concat(todays.filter(j => j.status === "booked"));
+    const done30 = S.jobs.filter(j => j.status === "done" && new Date(j.starts_at) > now - 30 * 864e5);
+    const needs = pending.length + S.alerts.length;
+    const sum = js => js.reduce((t, j) => t + Number(j.price), 0);
+
+    return '<h1 class="page">' + hello + "</h1>" +
+      '<p class="date">' + esc(f(now, { weekday: "long", month: "long", day: "numeric" })) + "</p>" +
+      '<div class="stats">' +
+      '<div class="card stat"><p class="t">Booked, next 7 days</p><p class="v">' + money(sum(week)) + '</p><p class="d">' + plural(week.length, "job", "jobs") + "</p></div>" +
+      '<div class="card stat"><p class="t">Finished, last 30 days</p><p class="v">' + money(sum(done30)) + '</p><p class="d">' + plural(done30.length, "job", "jobs") + "</p></div></div>" +
+
+      '<h2 class="sec">Needs you' + (needs ? ' <span class="count">' + needs + "</span>" : "") + "</h2>" +
+      (needs ? '<div class="stack">' + pending.map(requestCard).join("") + S.alerts.map(alertCard).join("") + "</div>"
+             : '<p class="empty">You\'re all caught up. The assistant is handling everything.</p>') +
+
+      (unfinished.length ? '<h2 class="sec">Did these get done?</h2><div class="list">' + unfinished.map(j => jobRow(j, dayLabel(j.starts_at).replace(/^\w+, /, ""))).join("") + "</div>" : "") +
+
+      '<h2 class="sec">Today</h2><div class="list">' +
+      (todays.length ? todays.map(j => jobRow(j)).join("") : '<p class="empty">No jobs today.</p>') + "</div>" +
+
+      (coming.length ? '<h2 class="sec">Coming up</h2><div class="list">' + coming.slice(0, 4).map(j => jobRow(j, dayLabel(j.starts_at).replace(/^\w+, /, ""))).join("") + "</div>" : "");
+  }
+
+  function viewInbox() {
+    const list = convos();
+    return '<h1 class="page">Messages</h1><p class="date">Every text with your customers. Tap one to read it or jump in.</p>' +
+      '<div class="list" style="margin-top:14px">' + (list.length ? list.map(({ c, last, needsReply }) => {
+        const by = last.direction === "in" ? "" : (BY[last.sent_by] || "Sent") + ": ";
+        return '<button type="button" class="row" data-chat="' + c.id + '"><span class="avatar" aria-hidden="true">' + esc((c.name || "#").slice(0, 1).toUpperCase()) + "</span>" +
+          '<span class="mid"><b>' + esc(who(c)) + "</b><span>" + esc(by + last.body) + "</span></span>" +
+          '<span class="end"><span class="ago">' + esc(ago(last.created_at)) + "</span>" +
+          (needsReply ? '<span class="pill pending">Your turn</span>' : c.ai_paused ? '<span class="pill done">You\'re handling</span>' : "") + "</span></button>";
+      }).join("") : '<p class="empty">No texts yet. When customers text or call your ItGo number, the conversations show up here.</p>') + "</div>";
+  }
+
+  function viewChat() {
+    const c = cust(chatId);
+    const ms = S.messages.filter(m => m.customer_id === chatId).sort((a, b) => a.created_at < b.created_at ? -1 : 1);
+    const next = S.jobs.filter(j => j.customer_id === chatId && ["pending", "booked"].includes(j.status) && new Date(j.ends_at) > Date.now()).sort(byStart)[0];
+    let lastDay = "", html = "";
+    for (const m of ms) {
+      const d = dayKey(m.created_at);
+      if (d !== lastDay) { html += '<p class="daysep">' + esc(dayLabel(m.created_at)) + "</p>"; lastDay = d; }
+      html += '<div class="bub ' + (m.direction === "in" ? "cust" : "ours") + '">' + esc(m.body) + "</div>" +
+        '<span class="by ' + (m.direction === "in" ? "cust" : "") + '">' + (m.direction === "in" ? "" : esc(BY[m.sent_by] || "Sent") + " · ") + esc(clock(m.created_at)) + "</span>";
+    }
+    return '<div class="chathead"><button type="button" class="back" data-back>‹ Messages</button></div>' +
+      '<div class="chathead"><div class="mid"><h1>' + esc(who(c)) + '</h1><p class="sub">' + esc([c.name ? prettyPhone(c.phone) : "", c.vehicle].filter(Boolean).join(" · ")) + "</p></div>" +
+      (c.phone ? '<a class="b" href="tel:' + esc(c.phone) + '">Call</a>' : "") + "</div>" +
+      (c.ai_paused
+        ? '<div class="handoff me"><span>You\'re handling this chat. The assistant won\'t reply.</span><button type="button" class="b" data-act="pause" data-on="0">Hand back</button></div>'
+        : '<div class="handoff ai"><span>The assistant is answering. Sending a text pauses it.</span><button type="button" class="b" data-act="pause" data-on="1">Take over</button></div>') +
+      (next ? '<button type="button" class="nextjob" data-job="' + next.id + '"><span><b>' + esc(next.service_name) + "</b><br>" + esc(whenText(next.starts_at)) + "</span>" + pill(next) + "</button>" : "") +
+      '<div class="bubbles">' + (html || '<p class="empty">No texts yet.</p>') + "</div>" +
+      '<form class="compose" id="compose"><label for="msg" class="sr" hidden>Message</label>' +
+      '<textarea id="msg" rows="1" maxlength="1000" placeholder="Text ' + esc(first(c) === "them" ? "this customer" : first(c)) + '…">' + esc(composeText) + "</textarea>" +
+      '<button class="b main" type="submit">Send</button></form>';
+  }
+
+  function viewJobs() {
+    const now = Date.now(), today = dayKey(now);
+    const up = jobsView === "upcoming";
+    const js = S.jobs.filter(j => up ? dayKey(j.starts_at) >= today && j.status !== "canceled" : dayKey(j.starts_at) < today)
+      .sort((a, b) => up ? byStart(a, b) : byStart(b, a));
+    let html = "", day = "";
+    for (const j of js) {
+      const d = dayKey(j.starts_at);
+      if (d !== day) { html += (day ? "</div>" : "") + '<p class="daygroup">' + esc(dayLabel(j.starts_at)) + '</p><div class="list">'; day = d; }
+      html += jobRow(j);
+    }
+    if (day) html += "</div>";
+    const total = js.filter(j => j.status !== "canceled").reduce((t, j) => t + Number(j.price), 0);
+    return '<h1 class="page">Jobs</h1>' +
+      '<div class="seg" role="group" aria-label="Which jobs"><button type="button" data-seg="upcoming" aria-pressed="' + up + '">Upcoming</button>' +
+      '<button type="button" data-seg="past" aria-pressed="' + !up + '">Past 60 days</button></div>' +
+      (js.length ? '<p class="date">' + plural(js.filter(j => j.status !== "canceled").length, "job", "jobs") + " · " + money(total) + "</p>" + html
+        : '<p class="empty">' + (up ? "Nothing on the calendar yet. New bookings show up here." : "No past jobs yet.") + "</p>");
+  }
+
+  function startDraft() {
+    const b = S.biz;
+    draft = {
+      biz: {
+        name: b.name || "", owner_phone: b.owner_phone || "", service_mode: b.service_mode || "mobile", service_area: b.service_area || "",
+        review_link: b.review_link || "", auto_confirm: !!b.auto_confirm, discount_policy: b.discount_policy || "ask",
+        max_discount: Number(b.max_discount) || 0, after_hours_ok: !!b.after_hours_ok, ring_owner: !!b.ring_owner,
+        rebook_days: b.rebook_days == null ? 0 : Number(b.rebook_days), ai_notes: b.ai_notes || "",
+      },
+      hours: [0, 1, 2, 3, 4, 5, 6].map(weekday => {
+        const h = S.hours.find(x => x.weekday === weekday);
+        return { weekday, open: !!h, open_time: (h?.open_time || "08:00").slice(0, 5), close_time: (h?.close_time || "17:00").slice(0, 5) };
+      }),
+    };
+  }
+
+  function viewSettings() {
+    if (!draft) startDraft();
+    const b = draft.biz;
+    const inp = (k, label, hint, type = "text", extra = "") => '<label class="f">' + label + (hint ? "<small>" + hint + "</small>" : "") +
+      '<input class="in" type="' + type + '" data-k="' + k + '" value="' + esc(b[k]) + '" ' + extra + "></label>";
+    const chk = (k, label, hint) => '<label class="check"><input type="checkbox" data-k="' + k + '"' + (b[k] ? " checked" : "") + "><span>" + label + (hint ? "<small>" + hint + "</small>" : "") + "</span></label>";
+    const sel = (k, label, opts) => '<label class="f">' + label + '<select class="in" data-k="' + k + '">' +
+      opts.map(([v, t]) => '<option value="' + v + '"' + (b[k] === v ? " selected" : "") + ">" + t + "</option>").join("") + "</select></label>";
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const svc = s => '<button type="button" class="row" data-svc="' + s.id + '"><span class="mid"><b>' + esc(s.name) + "</b><span>" +
+      esc((s.is_addon ? "Add-on · " : "") + (Number(s.duration_minutes) / 60).toString().replace(/\.5$/, "½").replace(/^0½$/, "½") + " hr" + (s.active ? "" : " · Hidden")) +
+      '</span></span><span class="end"><span class="price">' + money(s.price) + "</span></span></button>";
+    const main = S.services.filter(s => !s.is_addon), adds = S.services.filter(s => s.is_addon);
+
+    return '<h1 class="page">Settings</h1><p class="date">What the assistant tells customers. Change anything, any time.</p>' +
+      '<h2 class="sec">Services and prices</h2><div class="list">' + (main.map(svc).join("") || '<p class="empty">No services yet.</p>') + "</div>" +
+      (adds.length ? '<p class="daygroup" style="margin-top:14px">Add-ons</p><div class="list">' + adds.map(svc).join("") + "</div>" : "") +
+      '<div class="btns"><button type="button" class="b" data-svc="new">+ Add a service</button></div>' +
+
+      '<h2 class="sec">Hours</h2><div class="card">' + draft.hours.map(h =>
+        '<div class="hrow"><label><input type="checkbox" data-h="' + h.weekday + '" data-hk="open"' + (h.open ? " checked" : "") + ">" + days[h.weekday] + "</label>" +
+        (h.open ? '<input class="in" type="time" aria-label="' + days[h.weekday] + ' opens" data-h="' + h.weekday + '" data-hk="open_time" value="' + h.open_time + '">' +
+                  '<input class="in" type="time" aria-label="' + days[h.weekday] + ' closes" data-h="' + h.weekday + '" data-hk="close_time" value="' + h.close_time + '">'
+                : '<span class="closed">Closed</span>') + "</div>").join("") + "</div>" +
+
+      '<h2 class="sec">Your business</h2><div class="card">' +
+      inp("name", "Business name", "", "text", 'autocomplete="organization"') +
+      inp("owner_phone", "Your cell", "Booking requests and heads-ups get texted here.", "tel", 'autocomplete="tel"') +
+      sel("service_mode", "Where you work", [["mobile", "I go to the customer"], ["shop", "Customers come to me"], ["both", "Both"]]) +
+      inp("service_area", "Service area", "For example: marinas in Pensacola, Gulf Breeze and Perdido Key") +
+      inp("review_link", "Google review link", "Sent to customers after each job.", "url") + "</div>" +
+
+      '<h2 class="sec">How the assistant works</h2><div class="card">' +
+      '<label class="check"><input type="checkbox" data-k="approve_all"' + (b.auto_confirm ? "" : " checked") + "><span>I approve every booking<small>Off = the assistant confirms open times on its own.</small></span></label>" +
+      sel("discount_policy", "When someone asks for a lower price", [["ask", "Ask me first"], ["never", "Never discount"], ["allowed", "Allow a small discount"]]) +
+      (b.discount_policy === "allowed" ? inp("max_discount", "Biggest discount, in dollars", "", "number", 'min="0" step="5" inputmode="decimal"') : "") +
+      chk("ring_owner", "Ring my cell first when someone calls", "If you don't pick up in about 15 seconds, they get a text right away.") +
+      chk("after_hours_ok", "Jobs can run past closing time", "Off = a job has to finish by closing.") +
+      '<label class="f">Invite customers back after this many weeks<small>0 = don\'t send come-back texts.</small><input class="in" type="number" min="0" max="52" inputmode="numeric" data-k="rebook_weeks" value="' + Math.round(b.rebook_days / 7) + '"></label>' +
+      '<label class="f">Notes for the assistant<small>Anything customers often ask: pricing by boat length, payment, what you need at the slip.</small><textarea class="in" data-k="ai_notes" rows="4">' + esc(b.ai_notes) + "</textarea></label></div>" +
+
+      '<div class="savebar"><button type="button" class="b main wide" data-act="saveSettings">Save changes</button></div>' +
+      (sample ? "" : '<div class="btns"><button type="button" class="b link" data-signout>Sign out</button></div>');
+  }
+
+  // ---------- Bottom sheet (job details, service editor) ----------
+  const sheet = $("sheet");
+  function openSheet(html) { sheet.innerHTML = html; if (!sheet.open) sheet.showModal(); }
+  function closeSheet() { if (sheet.open) sheet.close(); }
+  sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
+
+  function jobSheet(id, confirmCancel) {
+    const j = S.jobs.find(x => x.id === id); if (!j) return;
+    const c = cust(j.customer_id), now = Date.now();
+    const fact = (t, v) => v ? "<div><dt>" + t + "</dt><dd>" + v + "</dd></div>" : "";
+    if (confirmCancel) {
+      return openSheet("<h2>Cancel this job?</h2>" +
+        '<p class="sub">' + esc(j.service_name) + " for " + esc(who(c)) + ", " + esc(whenText(j.starts_at)) + "</p>" +
+        '<label class="check"><input type="checkbox" id="notify" checked><span>Text ' + esc(first(c)) + " that it's canceled<small>Uncheck if they already know.</small></span></label>" +
+        '<div class="btns"><button type="button" class="b no" data-act="cancel" data-id="' + j.id + '">Cancel job</button><button type="button" class="b" data-job="' + j.id + '">Keep it</button></div>');
+    }
+    const btns = [];
+    if (j.status === "pending") btns.push('<button type="button" class="b go" data-act="approve" data-id="' + j.id + '">Approve</button>', '<button type="button" class="b no" data-act="decline" data-id="' + j.id + '">Decline</button>');
+    if (j.status === "booked" && new Date(j.starts_at) <= now) btns.push('<button type="button" class="b go" data-act="done" data-id="' + j.id + '">Mark done</button>');
+    btns.push('<button type="button" class="b" data-chat="' + c.id + '">Messages</button>');
+    if (c.phone) btns.push('<a class="b" href="tel:' + esc(c.phone) + '">Call</a>');
+    if (j.status === "booked") btns.push('<button type="button" class="b no" data-cancel="' + j.id + '">Cancel job</button>');
+    openSheet("<h2>" + esc(j.service_name) + "</h2>" +
+      '<p class="sub">' + esc(f(j.starts_at, { weekday: "long", month: "long", day: "numeric" })) + " · " + esc(clock(j.starts_at)) + "–" + esc(clock(j.ends_at)) + "</p>" +
+      '<dl class="facts">' + fact("Customer", esc(who(c)) + (c.name && c.phone ? "<br>" + esc(prettyPhone(c.phone)) : "")) +
+      fact("Boat or vehicle", esc(c.vehicle)) + fact("Where", esc(c.address)) + fact("Price", money(j.price)) +
+      fact("Status", pill(j)) + fact("Notes", esc(j.notes)) + "</dl>" +
+      '<div class="btns">' + btns.join("") + '</div><div class="btns"><button type="button" class="b link" data-close>Close</button></div>');
+  }
+
+  function serviceSheet(id) {
+    const s = S.services.find(x => x.id === id) || { name: "", price: "", duration_minutes: 120, includes: "", is_addon: false, active: true };
+    openSheet("<h2>" + (s.id ? "Edit service" : "New service") + '</h2><form id="svcform" data-id="' + esc(s.id || "") + '">' +
+      '<label class="f">Name<input class="in" name="name" required maxlength="80" value="' + esc(s.name) + '"></label>' +
+      '<div class="two"><label class="f">Price ($)<input class="in" name="price" type="number" min="0" step="1" inputmode="decimal" required value="' + esc(s.price) + '"></label>' +
+      '<label class="f">Hours it takes<input class="in" name="hours" type="number" min="0.5" step="0.5" inputmode="decimal" required value="' + Number(s.duration_minutes) / 60 + '"></label></div>' +
+      '<label class="f">What\'s included<small>The assistant reads this to customers who ask.</small><textarea class="in" name="includes" rows="3" maxlength="600">' + esc(s.includes) + "</textarea></label>" +
+      '<label class="check"><input type="checkbox" name="is_addon"' + (s.is_addon ? " checked" : "") + "><span>This is an add-on<small>Added to another service, like teak cleaning.</small></span></label>" +
+      '<label class="check"><input type="checkbox" name="active"' + (s.active ? " checked" : "") + "><span>Offer this to customers<small>Uncheck to hide it without deleting it.</small></span></label>" +
+      '<div class="btns"><button class="b main" type="submit">Save service</button><button type="button" class="b link" data-close>Cancel</button></div></form>');
+  }
+
+  // ---------- Drawing ----------
+  function setBadge(name, n) {
+    const el = document.querySelector('[data-tab="' + name + '"] .badge');
+    if (el) { el.hidden = !n; el.textContent = n; }
+  }
+
+  function render() {
+    document.body.classList.remove("out");
+    $("tabs").hidden = false;
+    $("bizname").textContent = S.biz.name;
+    setBadge("today", S.jobs.filter(j => j.status === "pending").length + S.alerts.length);
+    setBadge("messages", convos().filter(c => c.needsReply).length);
+    document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+    const top = sample ? '<div class="sample">Sample business with made-up customers. Nothing here is saved or texted. <a href="./">Sign in</a></div>' : "";
+    $("view").innerHTML = top + (tab === "today" ? viewToday() : tab === "messages" ? (chatId ? viewChat() : viewInbox()) : tab === "jobs" ? viewJobs() : viewSettings());
+    if (tab === "messages" && chatId) { growBox(); window.scrollTo(0, document.body.scrollHeight); }
+  }
+
+  function growBox() { const t = $("msg"); if (t) { t.style.height = "auto"; t.style.height = Math.min(150, t.scrollHeight + 2) + "px"; } }
+
+  let toastTimer;
+  function toast(text) {
+    const t = $("toast"); t.textContent = text; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+  }
+
+  function go(next, cid) {
+    tab = next; chatId = cid || null;
+    if (next !== "settings") draft = null;
+    closeSheet(); render(); window.scrollTo(0, cid ? document.body.scrollHeight : 0);
+  }
+
+  // ---------- Taps ----------
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-tab],[data-act],[data-chat],[data-job],[data-svc],[data-close],[data-back],[data-seg],[data-cancel],[data-signout]");
+    if (!t) return;
+    const d = t.dataset;
+    if (d.tab) return go(d.tab);
+    if (d.chat) { composeText = ""; return go("messages", d.chat); }
+    if (d.back !== undefined) return go("messages");
+    if (d.seg) { jobsView = d.seg; return render(); }
+    if (d.job) return jobSheet(d.job);
+    if (d.cancel) return jobSheet(d.cancel, true);
+    if (d.svc) return serviceSheet(d.svc === "new" ? null : d.svc);
+    if (d.close !== undefined) return closeSheet();
+    if (d.signout !== undefined) return sb.auth.signOut().then(() => location.replace("./"));
+    const a = d.act;
+    if (a === "approve" || a === "decline" || a === "done") return act(a, { job_id: d.id }, t);
+    if (a === "cancel") return act("cancel", { job_id: d.id, notify: !!$("notify")?.checked }, t);
+    if (a === "handled") return act("handled", { id: d.id }, t);
+    if (a === "pause") return act("pause", { customer_id: chatId, on: d.on === "1" }, t);
+    if (a === "saveSettings") return saveSettings(t);
+  });
+
+  function saveSettings(btn) {
+    const b = { ...draft.biz };
+    const digits = b.owner_phone.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+    if (b.owner_phone && digits.length !== 10) return toast("Your cell needs to be a 10-digit number.");
+    if (!b.name.trim()) return toast("Your business needs a name.");
+    for (const h of draft.hours) if (h.open && h.close_time <= h.open_time) return toast("Closing time has to be after opening time.");
+    b.owner_phone = digits ? "+1" + digits : null;
+    b.name = b.name.trim();
+    b.review_link = b.review_link.trim() || null;
+    b.service_area = b.service_area.trim() || null;
+    b.ai_notes = b.ai_notes.trim() || null;
+    b.rebook_days = b.rebook_days > 0 ? b.rebook_days : null;
+    const hours = draft.hours.filter(h => h.open).map(h => ({ weekday: h.weekday, open_time: h.open_time, close_time: h.close_time }));
+    draft = null;
+    act("saveSettings", { biz: b, hours }, btn);
+  }
+
+  document.addEventListener("input", e => {
+    const t = e.target;
+    if (t.id === "msg") { composeText = t.value; return growBox(); }
+    if (!draft) return;
+    if (t.dataset.k) {
+      const k = t.dataset.k;
+      if (k === "approve_all") draft.biz.auto_confirm = !t.checked;
+      else if (k === "rebook_weeks") draft.biz.rebook_days = Math.max(0, Math.round(Number(t.value) || 0)) * 7;
+      else if (t.type === "checkbox") draft.biz[k] = t.checked;
+      else if (t.type === "number") draft.biz[k] = Number(t.value) || 0;
+      else draft.biz[k] = t.value;
+      if (k === "discount_policy") render();
+    }
+    if (t.dataset.h) {
+      const h = draft.hours[Number(t.dataset.h)];
+      if (t.dataset.hk === "open") { h.open = t.checked; render(); }
+      else h[t.dataset.hk] = t.value;
+    }
+  });
+
+  document.addEventListener("submit", e => {
+    e.preventDefault();
+    const form = e.target;
+    if (form.id === "compose") {
+      const body = composeText.trim();
+      if (!body) return;
+      const btn = form.querySelector("button");
+      composeText = "";
+      return act("send", { customer_id: chatId, body }, btn);
+    }
+    if (form.id === "svcform") {
+      const v = new FormData(form);
+      return act("saveService", {
+        ...(form.dataset.id ? { id: form.dataset.id } : {}),
+        name: String(v.get("name")).trim(), price: Number(v.get("price")) || 0,
+        duration_minutes: Math.max(30, Math.round(Number(v.get("hours")) * 2) * 30),
+        includes: String(v.get("includes")).trim() || null, is_addon: v.has("is_addon"), active: v.has("active"),
+      }, form.querySelector("button"));
+    }
+    if (form.id === "login") return sendCode(form);
+    if (form.id === "code") return checkCode(form);
+  });
+
+  // Enter sends on a computer; Shift+Enter makes a new line
+  document.addEventListener("keydown", e => {
+    if (e.target.id === "msg" && e.key === "Enter" && !e.shiftKey && matchMedia("(hover:hover)").matches) {
+      e.preventDefault(); $("compose").requestSubmit();
+    }
+  });
+
+  // ---------- Sign in with a code sent by email ----------
+  let loginEmail = "";
+  function showLogin(step, note) {
+    document.body.classList.add("out");
+    $("tabs").hidden = true;
+    $("bizname").textContent = "";
+    $("view").innerHTML = '<div class="login"><div class="card">' + (step === "code"
+      ? '<h1 class="page">Check your email</h1><p class="sub">We sent a sign-in link and code to <b>' + esc(loginEmail) + "</b>. Tap the link, or type the code here.</p>" +
+        '<form id="code"><label class="f">Code<input class="in" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" required></label>' +
+        '<div class="btns"><button class="b main wide" type="submit">Sign in</button></div></form>' +
+        '<div class="btns"><button type="button" class="b link" id="restart">Use a different email</button></div>'
+      : '<h1 class="page">Sign in</h1><p class="sub">Use the email you gave ItGo. We\'ll email you a sign-in code. No password needed.</p>' +
+        '<form id="login"><label class="f">Email<input class="in" name="email" type="email" autocomplete="email" required value="' + esc(loginEmail) + '"></label>' +
+        '<div class="btns"><button class="b main wide" type="submit">Email me a code</button></div></form>') +
+      (note ? '<p class="note">' + esc(note) + "</p>" : "") +
+      '</div><p class="sub" style="text-align:center;margin-top:16px"><a href="?sample=1">See a sample business</a></p></div>';
+    const r = $("restart"); if (r) r.onclick = () => showLogin("email");
+  }
+
+  async function sendCode(form) {
+    loginEmail = String(new FormData(form).get("email")).trim().toLowerCase();
+    form.querySelector("button").disabled = true;
+    const { error } = await sb.auth.signInWithOtp({ email: loginEmail, options: { emailRedirectTo: location.origin + location.pathname } });
+    if (error) return showLogin("email", error.message.includes("rate") ? "Too many tries. Wait a minute and try again." : error.message);
+    showLogin("code");
+  }
+
+  async function checkCode(form) {
+    form.querySelector("button").disabled = true;
+    const token = String(new FormData(form).get("code")).trim();
+    const { error } = await sb.auth.verifyOtp({ email: loginEmail, token, type: "email" });
+    if (error) return showLogin("code", "That code didn't work. Check the newest email and try again.");
+    start();
+  }
+
+  async function start() {
+    try {
+      if (!(await load())) {
+        const { data: { user } } = await sb.auth.getUser();
+        document.body.classList.add("out");
+        $("view").innerHTML = '<div class="login"><div class="card"><h1 class="page">Almost there</h1><p class="sub">You\'re signed in as <b>' + esc(user?.email) +
+          "</b>, but no business is linked to that email yet. Email <a href=\"mailto:support@itgoai.net\">support@itgoai.net</a> and we'll connect it.</p>" +
+          '<div class="btns"><button type="button" class="b link" data-signout>Sign out</button></div></div></div>';
+        return;
+      }
+      render();
+    } catch (e) {
+      $("view").innerHTML = '<p class="msg">Couldn\'t load your business right now. Pull down to refresh, or try again in a minute.</p>';
+      console.error(e);
+    }
+  }
+
+  // New texts and bookings show up on their own while the app is open
+  setInterval(async () => {
+    if (sample || !S || busy || document.hidden || sheet.open || tab === "settings" || composeText) return;
+    try { if (await load()) render(); } catch (e) { console.error(e); }
+  }, 30000);
+
+  if (sample) { S = sampleState(); render(); return; }
+  sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: "implicit" } });
+  sb.auth.getSession().then(({ data: { session } }) => session ? start() : showLogin("email"));
+})();
+</script>
+</body>
+</html>
