@@ -17,8 +17,8 @@
 <link rel="stylesheet" href="../style.css">
 <style>
 /* Owner app: Today, Messages, Jobs, Settings. Phone first, works on a computer too. */
-:root{--good:#1d7a4a;--good-bg:#e3f3ea;--pend:#8a4f00;--pend-bg:#fdf0db;--bad:#a3271f;--bad-bg:#fbe4e1;--bubble:#e9edf1;--outb:#1f3a52;--tabh:62px}
-@media (prefers-color-scheme:dark){:root{--good:#6fd39c;--good-bg:#16342a;--pend:#f5c169;--pend-bg:#3a2c12;--bad:#ff8f84;--bad-bg:#3d1c19;--bubble:#243140;--outb:#2c5277}}
+:root{--bar:#c26a0e;--good:#1d7a4a;--good-bg:#e3f3ea;--pend:#8a4f00;--pend-bg:#fdf0db;--bad:#a3271f;--bad-bg:#fbe4e1;--bubble:#e9edf1;--outb:#1f3a52;--tabh:62px}
+@media (prefers-color-scheme:dark){:root{--bar:#cf7a18;--good:#6fd39c;--good-bg:#16342a;--pend:#f5c169;--pend-bg:#3a2c12;--bad:#ff8f84;--bad-bg:#3d1c19;--bubble:#243140;--outb:#2c5277}}
 body{font-size:17px;padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom))}
 body.out{padding-bottom:0}
 .bar{background:var(--deep);color:#eef2f6;padding-top:env(safe-area-inset-top);position:sticky;top:0;z-index:5}
@@ -137,16 +137,43 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
 .login .card{padding:24px}
 .login form{margin-top:18px}
 .msg{padding:40px 0;color:var(--muted)}
+.bar .right{display:flex;align-items:center;gap:4px;min-width:0}
+.gear{border:0;background:none;color:#c9d3dc;width:44px;height:44px;display:grid;place-items:center;border-radius:10px;flex:none}
+.gear svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gear[aria-current="page"]{color:var(--accent)}
+[hidden]{display:none!important}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.toprow h1{margin:0}
+.search{margin:12px 0}
+.win{display:block;width:100%;text-align:left;background:var(--deep);color:#eef2f6;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+.win b{display:block;font-size:24px;color:var(--accent);font-variant-numeric:tabular-nums}
+.win span{color:#c9d3dc;font-size:15px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile .t{color:var(--muted);font-size:14px;margin:0}
+.tile .v{font-weight:700;font-size:24px;margin:2px 0;font-variant-numeric:tabular-nums}
+.tile .d{color:var(--muted);font-size:14px;margin:0}
+@media (min-width:700px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.bigcard .label{color:var(--muted);margin:0}
+.bigcard .big{font:700 clamp(40px,10vw,56px)/1.05 var(--body);margin:4px 0;font-variant-numeric:tabular-nums}
+.chartwrap{position:relative}
+.chartwrap svg{display:block;width:100%;overflow:visible}
+.chartwrap text{font-family:var(--body);fill:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:8px;font-size:14px;white-space:nowrap;transform:translate(-50%,-100%);display:none}
+.addons{display:grid;gap:6px;margin-top:8px}
+.addons label{display:flex;gap:10px;align-items:center;font-weight:400;font-size:16px}
+.addons input{width:20px;height:20px;accent-color:var(--good);flex:none}
+.hint{color:var(--muted);font-size:14px;margin:6px 0 0}
 </style>
 </head>
 <body>
-<header class="bar"><div class="wrap"><span class="logo">ItGo<span>.ai</span></span><span class="biz" id="bizname"></span></div></header>
+<header class="bar"><div class="wrap"><span class="logo">ItGo<span>.ai</span></span><span class="right"><span class="biz" id="bizname"></span><button type="button" class="gear" id="gear" data-tab="settings" aria-label="Settings" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></span></div></header>
 <main class="wrap" id="view"><p class="msg">Loading…</p></main>
 <nav class="tabs" id="tabs" hidden aria-label="Sections"><div class="tabin">
   <button type="button" data-tab="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Today<span class="badge" hidden></span></button>
   <button type="button" data-tab="messages"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Messages<span class="badge" hidden></span></button>
   <button type="button" data-tab="jobs"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Jobs</button>
-  <button type="button" data-tab="settings"><svg viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Settings</button>
+  <button type="button" data-tab="customers"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.5c1.8.8 3 2.7 3 5.5"/></svg>Customers</button>
+  <button type="button" data-tab="results"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6M3 20h18"/></svg>Results</button>
 </div></nav>
 <dialog class="sheet" id="sheet"></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -163,6 +190,12 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
   const money = n => "$" + (Number(n) || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
   const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
   let sb = null, S = null, tab = "today", chatId = null, jobsView = "upcoming", draft = null, composeText = "", busy = false;
+  let custQuery = "", resultsDays = 30, results = null;
+  const short = n => n >= 1000 ? "$" + (Math.round(n / 100) / 10).toString().replace(/\.0$/, "") + "K" : "$" + Math.round(n);
+  const periodText = d => d === 0 ? "all time" : "the last " + d + " days";
+  // Boat services can be priced by the foot: length x rate, never below the normal price (the minimum)
+  const priceFor = (s, len) => Number(s.price_per_foot) > 0 && len ? Math.max(Number(s.price), Math.round(Number(s.price_per_foot) * len)) : Number(s.price);
+  const priceText = s => Number(s.price_per_foot) > 0 ? money(s.price_per_foot) + "/ft · min " + money(s.price) : money(s.price);
 
   // ---------- Time, always shown in the business's time zone ----------
   const f = (d, o) => new Intl.DateTimeFormat("en-US", { timeZone: S.biz.timezone, ...o }).format(new Date(d));
@@ -207,7 +240,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       ai_notes: "Prices are for boats up to 26 ft. Over 26 ft, add $15 per foot. We need fresh water and power at the slip. Payment by card or Venmo after the job.",
     };
     const services = [
-      ["Maintenance Wash", 180, 120, "Freshwater wash top to bottom, hull sides, windows and stainless wiped down, vinyl wiped.", false],
+      ["Maintenance Wash", 150, 120, "Freshwater wash top to bottom, hull sides, windows and stainless wiped down, vinyl wiped.", false],
       ["Wash & Wax", 450, 300, "Everything in the Maintenance Wash plus hand-applied marine wax on the hull and topsides.", false],
       ["Oxidation Removal", 950, 480, "Machine compound and polish to remove chalky oxidation, then wax.", false],
       ["Interior Detail", 250, 180, "Vinyl seats cleaned and conditioned, snap-in carpet shampooed, cabin wiped down, mildew treated.", false],
@@ -215,7 +248,8 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       ["Teak Cleaning", 120, 60, "Two-part teak clean and brighten.", true],
       ["Waterline Stain Removal", 100, 45, "Removes the brown waterline and scum line.", true],
       ["Metal Polish", 80, 45, "Rails, cleats and stainless polished.", true],
-    ].map(([name, price, duration_minutes, includes, is_addon]) => ({ id: id(), name, price, duration_minutes, includes, is_addon, active: true }));
+    ].map(([name, price, duration_minutes, includes, is_addon]) => ({ id: id(), name, price, duration_minutes, includes, is_addon, active: true,
+      price_per_foot: { "Maintenance Wash": 6, "Wash & Wax": 18, "Oxidation Removal": 35, "Interior Detail": 8, "Ceramic Coating": 75, "Waterline Stain Removal": 4 }[name] || null }));
     const hours = [1, 2, 3, 4, 5, 6].map(weekday => ({ weekday, open_time: weekday === 6 ? "08:00" : "07:00", close_time: weekday === 6 ? "14:00" : "17:00" }));
     const customers = {};
     [
@@ -226,7 +260,8 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       ["c5", "Ray Castillo", "+18505550191", "19' Bayliner", "Shoreline Park boat ramp"],
       ["c6", "Jen Whitaker", "+18505550127", "26' Pursuit", "Bahia Mar Marina, slip 22", true],
       ["c7", "", "+18505550155", "", ""],
-    ].forEach(([cid, name, phone, vehicle, address, paused]) => customers[cid] = { id: cid, name, phone, vehicle, address, ai_paused: !!paused });
+    ].forEach(([cid, name, phone, vehicle, address, paused]) => customers[cid] = { id: cid, name, phone, vehicle, address, ai_paused: !!paused,
+      length_ft: Number((vehicle.match(/^(\d+)'/) || [])[1]) || null, notes: cid === "c4" ? "Likes the stainless done twice. Pays by Venmo." : "" });
     const J = (customer_id, service_name, price, starts_at, hrs, status, extra = {}) => ({
       id: id(), customer_id, service_name, price, starts_at, ends_at: new Date(new Date(starts_at).getTime() + hrs * 36e5).toISOString(),
       status, source: "sms", customer_offer: null, notes: null, created_at: minsAgo(4320), ...extra,
@@ -275,7 +310,11 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       { id: id(), customer_id: "c5", kind: "price_request", summary: "Asked for the Interior Detail at $200 instead of $250. 19' Bayliner, mostly the seats.", created_at: minsAgo(96) },
       { id: id(), customer_id: "c7", kind: "question", summary: "Asked if we can remove heavy waterline stains on a pontoon.", created_at: minsAgo(69) },
     ];
-    return { biz, services, hours, customers, jobs, messages, alerts };
+    // Older visits from before the last 60 days, so customer totals look like a real business
+    const history = { c1: [3, 1320, 400], c3: [4, 620, 300], c4: [5, 4100, 500], c6: [2, 2900, 200], c2: [1, 380, 120] };
+    const totals = {};
+    for (const [cid, [visits, spent, daysAgo]] of Object.entries(history)) totals[cid] = { visits, spent, first_visit: minsAgo(daysAgo * 1440) };
+    return { biz: { ...biz, detail_type: "boats" }, services, hours, customers, jobs, messages, alerts, totals, sampleHistory: true };
   }
   function whenAt(iso) {
     return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
@@ -287,7 +326,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     if (error) throw error;
     if (!bizId) return false;
     const since = new Date(Date.now() - 60 * 864e5).toISOString();
-    const [biz, services, hours, jobs, messages, customers, alerts] = await Promise.all([
+    const [biz, services, hours, jobs, messages, customers, alerts, totals] = await Promise.all([
       sb.from("businesses").select("*").eq("id", bizId).single(),
       sb.from("services").select("*").eq("business_id", bizId).order("is_addon").order("price"),
       sb.from("working_hours").select("*").eq("business_id", bizId),
@@ -296,11 +335,14 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
         .order("created_at", { ascending: false }).limit(1000),
       sb.from("customers").select("*").eq("business_id", bizId).limit(5000),
       sb.from("alerts").select("*").eq("business_id", bizId).eq("handled", false).order("created_at", { ascending: false }).limit(50),
+      sb.rpc("my_customer_totals"),
     ]);
-    for (const r of [biz, services, hours, jobs, messages, customers, alerts]) if (r.error) throw r.error;
+    for (const r of [biz, services, hours, jobs, messages, customers, alerts, totals]) if (r.error) throw r.error;
     const byId = {};
     for (const c of customers.data) byId[c.id] = c;
-    S = { biz: biz.data, services: services.data, hours: hours.data, jobs: jobs.data, messages: messages.data, customers: byId, alerts: alerts.data };
+    const tot = {};
+    for (const t of totals.data || []) tot[t.customer_id] = t;
+    S = { biz: biz.data, services: services.data, hours: hours.data, jobs: jobs.data, messages: messages.data, customers: byId, alerts: alerts.data, totals: tot };
     return true;
   }
 
@@ -311,6 +353,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     try {
       const msg = await (sample ? sampleAct : realAct)(name, p);
       if (!sample) await load();
+      results = null;
       closeSheet(); render();
       if (msg) toast(msg);
     } catch (e) {
@@ -352,17 +395,34 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       S.hours = p.hours;
       return "Saved.";
     }
+    if (name === "saveCustomer") { Object.assign(cust(p.id), p.fields); return "Customer saved."; }
+    if (name === "saveJob") {
+      let cid = p.customer_id;
+      if (!cid) {
+        const phone = "+1" + String(p.phone).replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+        if (phone.length !== 12) throw new Error("Add the customer's 10-digit phone number.");
+        cid = Object.values(S.customers).find(c => c.phone === phone)?.id || "c" + Math.random();
+        S.customers[cid] ||= { id: cid, name: p.name || "", phone, vehicle: "", address: "", notes: "" };
+      }
+      const start = new Date(p.date + "T" + p.time.padStart(5, "0"));
+      const row = { service_name: p.service_name, price: p.price, notes: p.notes || null, starts_at: start.toISOString(),
+        ends_at: new Date(start.getTime() + p.duration_minutes * 6e4).toISOString() };
+      const old = p.job_id && S.jobs.find(j => j.id === p.job_id);
+      if (old) Object.assign(old, row);
+      else S.jobs.push({ id: "j" + Math.random(), customer_id: cid, status: "booked", source: "app", customer_offer: null, created_at: new Date().toISOString(), ...row });
+      return (old ? "Job updated." : "Job added.") + (p.notify ? " (Sample: no text sent.)" : "");
+    }
   }
 
   async function realAct(name, p) {
     // These text the customer, so they go through ItGo's server
-    if (["approve", "decline", "cancel", "send"].includes(name)) {
+    if (["approve", "decline", "cancel", "send", "saveJob"].includes(name)) {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) throw new Error("Please sign in again.");
       const res = await fetch(FN, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: "Bearer " + session.access_token },
-        body: JSON.stringify({ action: name, ...p }),
+        body: JSON.stringify({ action: name === "saveJob" ? "save_job" : name, ...p }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "Couldn't do that right now. Try again.");
@@ -381,6 +441,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
                : await sb.from("services").insert({ ...row, business_id: S.biz.id }));
       return "Service saved.";
     }
+    if (name === "saveCustomer") { check(await sb.from("customers").update(p.fields).eq("id", p.id)); return "Customer saved."; }
     if (name === "saveSettings") {
       check(await sb.from("businesses").update(p.biz).eq("id", S.biz.id));
       check(await sb.from("working_hours").delete().eq("business_id", S.biz.id));
@@ -451,8 +512,10 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     const needs = pending.length + S.alerts.length;
     const sum = js => js.reduce((t, j) => t + Number(j.price), 0);
 
+    const won = S.jobs.filter(j => j.source === "sms" && ["booked", "done"].includes(j.status) && new Date(j.created_at) > now - 30 * 864e5);
     return '<h1 class="page">' + hello + "</h1>" +
       '<p class="date">' + esc(f(now, { weekday: "long", month: "long", day: "numeric" })) + "</p>" +
+      (won.length ? '<button type="button" class="win" data-tab="results"><b>' + money(sum(won)) + "</b><span>booked by your ItGo assistant in the last 30 days · " + plural(won.length, "job", "jobs") + " · See results ›</span></button>" : "") +
       '<div class="stats">' +
       '<div class="card stat"><p class="t">Booked, next 7 days</p><p class="v">' + money(sum(week)) + '</p><p class="d">' + plural(week.length, "job", "jobs") + "</p></div>" +
       '<div class="card stat"><p class="t">Finished, last 30 days</p><p class="v">' + money(sum(done30)) + '</p><p class="d">' + plural(done30.length, "job", "jobs") + "</p></div></div>" +
@@ -518,18 +581,161 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     }
     if (day) html += "</div>";
     const total = js.filter(j => j.status !== "canceled").reduce((t, j) => t + Number(j.price), 0);
-    return '<h1 class="page">Jobs</h1>' +
+    return '<div class="toprow"><h1 class="page">Jobs</h1><button type="button" class="b main" data-newjob="">+ New job</button></div>' +
       '<div class="seg" role="group" aria-label="Which jobs"><button type="button" data-seg="upcoming" aria-pressed="' + up + '">Upcoming</button>' +
       '<button type="button" data-seg="past" aria-pressed="' + !up + '">Past 60 days</button></div>' +
       (js.length ? '<p class="date">' + plural(js.filter(j => j.status !== "canceled").length, "job", "jobs") + " · " + money(total) + "</p>" + html
         : '<p class="empty">' + (up ? "Nothing on the calendar yet. New bookings show up here." : "No past jobs yet.") + "</p>");
   }
 
+  // Lifetime numbers for one customer. Sample mode adds made-up older visits to the jobs on screen.
+  function totalsFor(cid) {
+    const base = S.totals[cid] || {};
+    if (!S.sampleHistory) return { visits: Number(base.visits) || 0, spent: Number(base.spent) || 0, first_visit: base.first_visit, last_visit: base.last_visit, next_visit: base.next_visit };
+    const now = Date.now(), js = S.jobs.filter(j => j.customer_id === cid);
+    const past = js.filter(j => ["booked", "done"].includes(j.status) && new Date(j.starts_at) < now).sort(byStart);
+    const next = js.filter(j => ["pending", "booked"].includes(j.status) && new Date(j.starts_at) >= now).sort(byStart)[0];
+    return {
+      visits: (base.visits || 0) + past.length, spent: (base.spent || 0) + past.reduce((t, j) => t + Number(j.price), 0),
+      first_visit: base.first_visit || past[0]?.starts_at, last_visit: past.at(-1)?.starts_at || base.first_visit, next_visit: next?.starts_at,
+    };
+  }
+
+  function custRows() {
+    const q = custQuery.trim().toLowerCase(), qd = q.replace(/\D/g, "");
+    const list = Object.values(S.customers)
+      .filter(c => !q || [c.name, c.vehicle, c.address, c.notes].some(v => String(v || "").toLowerCase().includes(q)) || (qd.length > 2 && String(c.phone).includes(qd)))
+      .map(c => ({ c, t: totalsFor(c.id) }))
+      .sort((a, b) => b.t.spent - a.t.spent || who(a.c).localeCompare(who(b.c)));
+    if (!list.length) return '<p class="empty">' + (q ? "Nobody matches that." : "No customers yet. Everyone who texts or calls your ItGo number is added here.") + "</p>";
+    return list.map(({ c, t }) => '<button type="button" class="row" data-cust="' + c.id + '"><span class="avatar" aria-hidden="true">' + esc((c.name || "#").slice(0, 1).toUpperCase()) + "</span>" +
+      '<span class="mid"><b>' + esc(who(c)) + "</b><span>" + esc([c.vehicle, t.next_visit ? "Next: " + dayLabel(t.next_visit).replace(/^\w+, /, "") : t.last_visit ? "Last: " + f(t.last_visit, { month: "short", day: "numeric" }) : ""].filter(Boolean).join(" · ") || prettyPhone(c.phone)) + "</span></span>" +
+      '<span class="end"><span class="price">' + money(t.spent) + '</span><span class="ago">' + plural(t.visits, "visit", "visits") + "</span></span></button>").join("");
+  }
+
+  function viewCustomers() {
+    const all = Object.values(S.customers).map(c => totalsFor(c.id));
+    const paying = all.filter(t => t.visits > 0), repeat = all.filter(t => t.visits > 1);
+    const spent = paying.reduce((t, x) => t + x.spent, 0);
+    return '<h1 class="page">Customers</h1><p class="date">Everyone who has texted, called or booked, and what they\'re worth to you.</p>' +
+      '<div class="tiles" style="margin-top:12px">' +
+      tile("Customers", String(Object.keys(S.customers).length), plural(paying.length, "has booked", "have booked")) +
+      tile("Come back", String(repeat.length), paying.length ? Math.round(100 * repeat.length / paying.length) + "% booked again" : "Repeat customers") +
+      tile("Spent with you", money(spent), "All time") +
+      tile("Average customer", money(paying.length ? spent / paying.length : 0), "Lifetime spend") + "</div>" +
+      '<input class="in search" id="custq" type="search" placeholder="Search name, boat, phone…" aria-label="Search customers" value="' + esc(custQuery) + '">' +
+      '<div class="list" id="custlist">' + custRows() + "</div>";
+  }
+
+  const tile = (t, v, d) => '<div class="card tile"><p class="t">' + esc(t) + '</p><p class="v">' + esc(v) + '</p><p class="d">' + esc(d) + "</p></div>";
+
+  function sampleResults(d) {
+    const f = d === 7 ? 0.25 : d === 30 ? 1 : d === 90 ? 2.9 : 4.2, r = n => Math.round(n * f);
+    const wk = new Date(); wk.setDate(wk.getDate() - wk.getDay());
+    return {
+      days: d, booked_money: r(9840), booked_jobs: r(19), customers_texted: r(37), after_hours: r(15), reply_seconds: 8,
+      missed_calls: r(9), missed_call_jobs: r(5), missed_call_money: r(2650), rebook_sent: r(14), rebook_jobs: r(6), rebook_money: r(2310),
+      addon_money: r(1180), reviews_requested: r(16), reminders_sent: r(21), lost_leads: r(3),
+      weekly: [1450, 1980, 1720, 2600, 2240, 2910, 3150, 2460].map((money, i) => {
+        const t = new Date(wk); t.setDate(t.getDate() - (7 - i) * 7);
+        return { week: t.toLocaleDateString("en-US", { month: "short", day: "numeric" }), money };
+      }),
+    };
+  }
+
+  async function loadResults() {
+    const d = resultsDays;
+    try {
+      const data = sample ? sampleResults(d) : (({ data, error }) => { if (error) throw error; return data; })(await sb.rpc("my_results", { p_days: d }));
+      if (d === resultsDays && tab === "results") { results = { days: d, data }; render(); }
+    } catch (e) {
+      console.error(e);
+      if (tab === "results") $("view").querySelector("#resout").innerHTML = '<p class="msg">Couldn\'t load your numbers right now. Try again in a minute.</p>';
+    }
+  }
+
+  function viewResults() {
+    const periods = [[7, "7 days"], [30, "30 days"], [90, "90 days"], [0, "All time"]];
+    const head = '<h1 class="page">Results</h1><p class="date">What your ItGo assistant did for the business.</p>' +
+      '<div class="seg" role="group" aria-label="Time period">' + periods.map(([v, t]) => '<button type="button" data-days="' + v + '" aria-pressed="' + (v === resultsDays) + '">' + t + "</button>").join("") + "</div>";
+    if (!results || results.days !== resultsDays) { setTimeout(loadResults); return head + '<div id="resout"><p class="empty">Adding up your numbers…</p></div>'; }
+    const d = results.data;
+    const avg = d.booked_jobs ? d.booked_money / d.booked_jobs : 0;
+    const rate = d.customers_texted ? Math.round(100 * Math.min(1, d.booked_jobs / d.customers_texted)) : 0;
+    const reply = d.reply_seconds == null ? "–" : d.reply_seconds < 60 ? d.reply_seconds + " sec" : Math.round(d.reply_seconds / 60) + " min";
+    return head + '<div id="resout"><section class="card bigcard"><p class="label">Booked by ItGo in ' + periodText(resultsDays) + "</p>" +
+      '<p class="big">' + money(d.booked_money) + "</p>" +
+      '<p class="sub">' + plural(d.booked_jobs, "job", "jobs") + (d.booked_jobs ? " · " + money(Math.round(avg)) + " average" : "") + "</p></section>" +
+
+      '<h2 class="sec">Money you\'d likely have missed</h2><div class="tiles">' +
+      tile("Missed calls saved", money(d.missed_call_money), plural(d.missed_call_jobs, "job", "jobs") + " from " + plural(d.missed_calls, "missed call", "missed calls")) +
+      tile("Past customers back", money(d.rebook_money), d.rebook_jobs + " of " + plural(d.rebook_sent, "customer", "customers") + " invited") +
+      tile("Add-ons sold", money(d.addon_money), "Extras added to bookings") +
+      tile("Answered after hours", String(d.after_hours), plural(d.after_hours, "customer", "customers") + " texted while you were closed") + "</div>" +
+
+      '<h2 class="sec">Booked each week</h2><div class="card"><div class="chartwrap"><div id="chart"></div><div class="tip" id="tip" role="status"></div></div>' +
+      '<details class="hint"><summary>Show as a table</summary>' + (d.weekly || []).map(w => esc(w.week) + ": " + money(w.money)).join("<br>") + "</details></div>" +
+
+      '<h2 class="sec">Activity</h2><div class="tiles">' +
+      tile("Customers who texted", String(d.customers_texted), rate + "% booked a job") +
+      tile("Typical reply time", reply, "From their text to our answer") +
+      tile("Reviews requested", String(d.reviews_requested), plural(d.reminders_sent, "reminder", "reminders") + " also sent") +
+      tile("Didn't book", String(d.lost_leads), d.lost_leads ? "We texted you each one. Worth a call." : "Nobody walked away") + "</div></div>";
+  }
+
+  // One series, so no legend: the heading says what's plotted. Hover or tap a week for its total.
+  function drawChart() {
+    const box = $("chart"); if (!box || !results) return;
+    const weeks = results.data.weekly || [];
+    if (!weeks.length) { box.innerHTML = '<p class="empty">No bookings yet.</p>'; return; }
+    const W = Math.max(280, box.clientWidth), H = 220, padL = 46, padR = 8, padT = 22, padB = 28;
+    const max = Math.max(0, ...weeks.map(w => Number(w.money)));
+    const raw = Math.max(max, 400) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+    const step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+    const top = step * Math.ceil(Math.max(max, 1) / step);
+    const y = v => padT + (H - padT - padB) * (1 - v / top);
+    const band = (W - padL - padR) / weeks.length, bw = Math.min(24, band * 0.6);
+    let svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Money booked each week">';
+    for (let v = 0; v <= top + 0.001; v += step) {
+      svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--line)" stroke-width="1"/>';
+      svg += '<text x="' + (padL - 8) + '" y="' + (y(v) + 4) + '" text-anchor="end" font-size="12" style="font-variant-numeric:tabular-nums">' + short(v) + "</text>";
+    }
+    const peak = weeks.reduce((b, w, i) => Number(w.money) > Number(weeks[b].money) ? i : b, 0);
+    weeks.forEach((w, i) => {
+      const cx = padL + band * (i + 0.5), v = Number(w.money), y0 = y(0), y1 = y(v), h = y0 - y1, r = Math.min(4, h);
+      if (h > 0) svg += '<path d="M' + (cx - bw / 2) + " " + y0 + "V" + (y1 + r) + "Q" + (cx - bw / 2) + " " + y1 + " " + (cx - bw / 2 + r) + " " + y1 +
+        "H" + (cx + bw / 2 - r) + "Q" + (cx + bw / 2) + " " + y1 + " " + (cx + bw / 2) + " " + (y1 + r) + "V" + y0 + 'Z" fill="var(--bar)"/>';
+      if (v > 0 && (i === weeks.length - 1 || i === peak))
+        svg += '<text x="' + cx + '" y="' + (y1 - 6) + '" text-anchor="middle" font-size="12" style="fill:var(--ink);font-weight:700">' + short(v) + "</text>";
+      if (band >= 52 || i % 2 === weeks.length % 2 || i === weeks.length - 1)
+        svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="12">' + esc(w.week) + "</text>";
+      svg += '<rect class="hit" data-i="' + i + '" x="' + (padL + band * i) + '" y="' + padT + '" width="' + band + '" height="' + (H - padT - padB) +
+        '" fill="transparent" tabindex="0" aria-label="Week of ' + esc(w.week) + ": " + money(v) + '"/>';
+    });
+    box.innerHTML = svg + "</svg>";
+    const tip = $("tip");
+    const show = el => {
+      const w = weeks[+el.dataset.i];
+      tip.textContent = "Week of " + w.week + ": " + money(w.money);
+      tip.style.left = (padL + band * (+el.dataset.i + 0.5)) + "px";
+      tip.style.top = (y(Number(w.money)) - 8) + "px";
+      tip.style.display = "block";
+    };
+    box.querySelectorAll(".hit").forEach(el => {
+      el.addEventListener("mouseenter", () => show(el));
+      el.addEventListener("focus", () => show(el));
+      el.addEventListener("click", () => show(el));
+      el.addEventListener("mouseleave", () => tip.style.display = "none");
+      el.addEventListener("blur", () => tip.style.display = "none");
+    });
+  }
+  let resizeTimer; addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawChart, 150); });
+
   function startDraft() {
     const b = S.biz;
     draft = {
       biz: {
-        name: b.name || "", owner_phone: b.owner_phone || "", service_mode: b.service_mode || "mobile", service_area: b.service_area || "",
+        name: b.name || "", owner_phone: b.owner_phone || "", detail_type: b.detail_type || "cars", service_mode: b.service_mode || "mobile", service_area: b.service_area || "",
         review_link: b.review_link || "", auto_confirm: !!b.auto_confirm, discount_policy: b.discount_policy || "ask",
         max_discount: Number(b.max_discount) || 0, after_hours_ok: !!b.after_hours_ok, ring_owner: !!b.ring_owner,
         rebook_days: b.rebook_days == null ? 0 : Number(b.rebook_days), ai_notes: b.ai_notes || "",
@@ -552,7 +758,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const svc = s => '<button type="button" class="row" data-svc="' + s.id + '"><span class="mid"><b>' + esc(s.name) + "</b><span>" +
       esc((s.is_addon ? "Add-on · " : "") + (Number(s.duration_minutes) / 60).toString().replace(/\.5$/, "½").replace(/^0½$/, "½") + " hr" + (s.active ? "" : " · Hidden")) +
-      '</span></span><span class="end"><span class="price">' + money(s.price) + "</span></span></button>";
+      '</span></span><span class="end"><span class="price">' + priceText(s) + "</span></span></button>";
     const main = S.services.filter(s => !s.is_addon), adds = S.services.filter(s => s.is_addon);
 
     return '<h1 class="page">Settings</h1><p class="date">What the assistant tells customers. Change anything, any time.</p>' +
@@ -569,6 +775,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       '<h2 class="sec">Your business</h2><div class="card">' +
       inp("name", "Business name", "", "text", 'autocomplete="organization"') +
       inp("owner_phone", "Your cell", "Booking requests and heads-ups get texted here.", "tel", 'autocomplete="tel"') +
+      sel("detail_type", "What you detail", [["cars", "Cars and trucks"], ["boats", "Boats"], ["both", "Both"]]) +
       sel("service_mode", "Where you work", [["mobile", "I go to the customer"], ["shop", "Customers come to me"], ["both", "Both"]]) +
       inp("service_area", "Service area", "For example: marinas in Pensacola, Gulf Breeze and Perdido Key") +
       inp("review_link", "Google review link", "Sent to customers after each job.", "url") + "</div>" +
@@ -605,23 +812,115 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     const btns = [];
     if (j.status === "pending") btns.push('<button type="button" class="b go" data-act="approve" data-id="' + j.id + '">Approve</button>', '<button type="button" class="b no" data-act="decline" data-id="' + j.id + '">Decline</button>');
     if (j.status === "booked" && new Date(j.starts_at) <= now) btns.push('<button type="button" class="b go" data-act="done" data-id="' + j.id + '">Mark done</button>');
-    btns.push('<button type="button" class="b" data-chat="' + c.id + '">Messages</button>');
+    btns.push('<button type="button" class="b" data-chat="' + c.id + '">Messages</button>', '<button type="button" class="b" data-cust="' + c.id + '">Customer</button>');
     if (c.phone) btns.push('<a class="b" href="tel:' + esc(c.phone) + '">Call</a>');
+    if (["pending", "booked"].includes(j.status)) btns.push('<button type="button" class="b" data-editjob="' + j.id + '">Edit</button>');
     if (j.status === "booked") btns.push('<button type="button" class="b no" data-cancel="' + j.id + '">Cancel job</button>');
     openSheet("<h2>" + esc(j.service_name) + "</h2>" +
       '<p class="sub">' + esc(f(j.starts_at, { weekday: "long", month: "long", day: "numeric" })) + " · " + esc(clock(j.starts_at)) + "–" + esc(clock(j.ends_at)) + "</p>" +
       '<dl class="facts">' + fact("Customer", esc(who(c)) + (c.name && c.phone ? "<br>" + esc(prettyPhone(c.phone)) : "")) +
-      fact("Boat or vehicle", esc(c.vehicle)) + fact("Where", esc(c.address)) + fact("Price", money(j.price)) +
+      fact("Boat or vehicle", esc([c.vehicle, c.length_ft && !String(c.vehicle || "").includes(String(Number(c.length_ft))) ? Number(c.length_ft) + " ft" : ""].filter(Boolean).join(", "))) + fact("Where", esc(c.address)) + fact("Price", money(j.price)) +
       fact("Status", pill(j)) + fact("Notes", esc(j.notes)) + "</dl>" +
       '<div class="btns">' + btns.join("") + '</div><div class="btns"><button type="button" class="b link" data-close>Close</button></div>');
   }
 
+  function custSheet(id, editing) {
+    const c = S.customers[id]; if (!c) return;
+    if (editing) {
+      return openSheet("<h2>Edit customer</h2>" + '<form id="custform" data-id="' + esc(c.id) + '">' +
+        '<label class="f">Name<input class="in" name="name" maxlength="80" autocomplete="off" value="' + esc(c.name) + '"></label>' +
+        '<div class="two"><label class="f">Boat or vehicle<input class="in" name="vehicle" maxlength="120" value="' + esc(c.vehicle) + '"></label>' +
+        '<label class="f">Length (ft)<input class="in" name="length_ft" type="number" min="0" max="300" step="1" inputmode="numeric" value="' + esc(c.length_ft ?? "") + '"></label></div>' +
+        '<label class="f">Where<small>Address, or marina and slip</small><input class="in" name="address" maxlength="200" value="' + esc(c.address) + '"></label>' +
+        '<label class="f">Your notes<small>Only you see these. Gate codes, how they pay, what they\'re picky about.</small><textarea class="in" name="notes" rows="3" maxlength="1000">' + esc(c.notes) + "</textarea></label>" +
+        '<div class="btns"><button class="b main" type="submit">Save</button><button type="button" class="b link" data-cust="' + c.id + '">Cancel</button></div></form>');
+    }
+    const t = totalsFor(id), now = Date.now();
+    const fact = (k, v) => v ? "<div><dt>" + k + "</dt><dd>" + v + "</dd></div>" : "";
+    const day = d => esc(f(d, { month: "short", day: "numeric", year: "numeric" }));
+    const js = S.jobs.filter(j => j.customer_id === id).sort((a, b) => byStart(b, a));
+    const boat = [c.vehicle, c.length_ft && !String(c.vehicle || "").includes(String(Number(c.length_ft))) ? Number(c.length_ft) + " ft" : ""].filter(Boolean).join(", ");
+    openSheet("<h2>" + esc(who(c)) + "</h2>" +
+      '<p class="sub">' + esc([c.name ? prettyPhone(c.phone) : "", c.ai_paused ? "You're handling texts" : ""].filter(Boolean).join(" · ")) + "</p>" +
+      '<div class="tiles" style="margin-top:14px">' + tile("Spent with you", money(t.spent), "All time") + tile("Visits", String(t.visits), t.last_visit ? "Last on " + f(t.last_visit, { month: "short", day: "numeric" }) : "None yet") + "</div>" +
+      '<dl class="facts">' + fact("Boat or vehicle", esc(boat)) + fact("Where", esc(c.address)) +
+      fact("Next visit", t.next_visit ? esc(whenText(t.next_visit)) : "") + fact("Customer since", t.first_visit ? day(t.first_visit) : "") +
+      fact("Your notes", esc(c.notes)) + "</dl>" +
+      '<div class="btns"><button type="button" class="b main" data-newjob="' + c.id + '">+ Book a job</button><button type="button" class="b" data-chat="' + c.id + '">Messages</button>' +
+      (c.phone ? '<a class="b" href="tel:' + esc(c.phone) + '">Call</a>' : "") + '<button type="button" class="b" data-custedit="' + c.id + '">Edit</button></div>' +
+      (js.length ? '<h2 class="sec">Jobs</h2><div class="list">' + js.map(j => jobRow(j, f(j.starts_at, { month: "short", day: "numeric" }))).join("") + "</div>" : "") +
+      (S.sampleHistory && t.visits > js.filter(j => ["booked", "done"].includes(j.status) && new Date(j.starts_at) < now).length ? '<p class="hint">Older visits are counted in the totals above.</p>' : "") +
+      '<div class="btns"><button type="button" class="b link" data-close>Close</button></div>');
+  }
+
+  // New job, or edit one. Price fills in from the service, add-ons and boat length until the owner types their own.
+  function jobForm(jobId, cid) {
+    const j = jobId && S.jobs.find(x => x.id === jobId);
+    if (j) cid = j.customer_id;
+    const c = cid ? S.customers[cid] : null;
+    const mains = S.services.filter(s => !s.is_addon && s.active), adds = S.services.filter(s => s.is_addon && s.active);
+    const svc = j ? S.services.find(s => s.id === j.service_id) || mains.find(s => j.service_name.startsWith(s.name)) : mains[0];
+    const start = j ? new Date(j.starts_at) : (() => { const t = new Date(Date.now() + 864e5); t.setHours(9, 0, 0, 0); return t; })();
+    const pad = n => String(n).padStart(2, "0");
+    const date = start.getFullYear() + "-" + pad(start.getMonth() + 1) + "-" + pad(start.getDate()), time = pad(start.getHours()) + ":" + pad(start.getMinutes());
+    const custs = Object.values(S.customers).sort((a, b) => who(a).localeCompare(who(b)));
+    const hours = j ? (new Date(j.ends_at) - start) / 36e5 : Number(svc?.duration_minutes || 120) / 60;
+    openSheet("<h2>" + (j ? "Edit job" : "New job") + '</h2><form id="jobform" data-id="' + esc(j?.id || "") + '"' + (j ? ' data-touched="1"' : "") + ">" +
+      (j ? '<p class="sub">' + esc(who(c)) + '</p><input type="hidden" name="cust" value="' + esc(cid) + '">'
+         : '<label class="f">Customer<select class="in" name="cust"><option value="">+ New customer</option>' +
+           custs.map(x => '<option value="' + x.id + '"' + (x.id === cid ? " selected" : "") + ">" + esc(who(x)) + (x.name ? " · " + esc(prettyPhone(x.phone)) : "") + "</option>").join("") + "</select></label>" +
+           '<div class="two" id="newcust"' + (c ? " hidden" : "") + '><label class="f">Name<input class="in" name="name" maxlength="80" autocomplete="off"></label>' +
+           '<label class="f">Cell<input class="in" name="phone" type="tel" autocomplete="off"></label></div>') +
+      '<label class="f">Service<select class="in" name="svc">' + mains.map(s => '<option value="' + s.id + '"' + (s === svc ? " selected" : "") + ">" + esc(s.name) + " · " + esc(priceText(s)) + "</option>").join("") + "</select></label>" +
+      (adds.length ? '<p class="f" style="margin-bottom:0">Add-ons</p><div class="addons">' + adds.map(s => '<label><input type="checkbox" name="add" value="' + s.id + '"' +
+        (j && j.service_name.includes(s.name) ? " checked" : "") + ">" + esc(s.name) + " · " + esc(priceText(s)) + "</label>").join("") + "</div>" : "") +
+      '<div class="two"><label class="f">Length (ft)<small>For per-foot prices</small><input class="in" name="len" type="number" min="0" max="300" step="1" inputmode="numeric" value="' + esc(c?.length_ft ?? "") + '"></label>' +
+      '<label class="f">Price ($)<small>Fills in on its own</small><input class="in" name="price" type="number" min="0" step="1" inputmode="decimal" required value="' + esc(j ? Number(j.price) : "") + '"></label></div>' +
+      '<div class="two"><label class="f">Day<input class="in" name="date" type="date" required value="' + date + '"></label>' +
+      '<label class="f">Start time<input class="in" name="time" type="time" step="900" required value="' + time + '"></label></div>' +
+      '<label class="f">Hours it takes<input class="in" name="hours" type="number" min="0.25" step="0.25" inputmode="decimal" required value="' + hours + '"></label>' +
+      '<label class="f">Notes<small>Marina, slip, gate code, anything for the day</small><textarea class="in" name="notes" rows="2" maxlength="1000">' + esc(j?.notes || "") + "</textarea></label>" +
+      '<label class="check"><input type="checkbox" name="notify" checked><span>Text the customer ' + (j ? "about the change" : "that they're booked") + "<small>Uncheck if you already told them.</small></span></label>" +
+      '<div class="btns"><button class="b main" type="submit">' + (j ? "Save changes" : "Add job") + '</button><button type="button" class="b link" data-close>Cancel</button></div></form>');
+    if (!j) fillJobForm($("jobform"));
+  }
+
+  // Price and hours from the chosen service, add-ons and length
+  function fillJobForm(form) {
+    const v = new FormData(form), len = Number(v.get("len")) || 0;
+    const picked = [S.services.find(s => s.id === v.get("svc")), ...v.getAll("add").map(id => S.services.find(s => s.id === id))].filter(Boolean);
+    const hint = form.querySelector('[name="price"]').closest("label").querySelector("small");
+    hint.textContent = picked.some(s => Number(s.price_per_foot) > 0) && !len ? "Add the length for per-foot prices" : "Fills in on its own";
+    if (form.dataset.touched) return;
+    form.price.value = picked.reduce((t, s) => t + priceFor(s, len), 0);
+    form.hours.value = Math.max(0.5, picked.reduce((t, s) => t + Number(s.duration_minutes), 0) / 60);
+  }
+
+  function saveJobForm(form) {
+    const v = new FormData(form);
+    const picked = [S.services.find(s => s.id === v.get("svc")), ...v.getAll("add").map(id => S.services.find(s => s.id === id))].filter(Boolean);
+    if (!picked.length) return toast("Add a service in Settings first.");
+    const cid = String(v.get("cust") || "");
+    const len = Number(v.get("len")) || 0;
+    const p = {
+      ...(form.dataset.id ? { job_id: form.dataset.id } : {}),
+      ...(cid ? { customer_id: cid } : { name: String(v.get("name") || "").trim(), phone: String(v.get("phone") || "") }),
+      service_id: picked[0].id, service_name: picked.map(s => s.name).join(" + "),
+      price: Number(v.get("price")), date: String(v.get("date")), time: String(v.get("time")),
+      duration_minutes: Math.round(Number(v.get("hours")) * 60), notes: String(v.get("notes") || "").trim(), notify: v.has("notify"),
+      ...(len > 0 ? { length_ft: len } : {}),
+    };
+    if (!(p.price >= 0) || v.get("price") === "") return toast("Add a price.");
+    act("saveJob", p, form.querySelector('button[type="submit"]'));
+  }
+
   function serviceSheet(id) {
-    const s = S.services.find(x => x.id === id) || { name: "", price: "", duration_minutes: 120, includes: "", is_addon: false, active: true };
+    const s = S.services.find(x => x.id === id) || { name: "", price: "", price_per_foot: null, duration_minutes: 120, includes: "", is_addon: false, active: true };
     openSheet("<h2>" + (s.id ? "Edit service" : "New service") + '</h2><form id="svcform" data-id="' + esc(s.id || "") + '">' +
       '<label class="f">Name<input class="in" name="name" required maxlength="80" value="' + esc(s.name) + '"></label>' +
       '<div class="two"><label class="f">Price ($)<input class="in" name="price" type="number" min="0" step="1" inputmode="decimal" required value="' + esc(s.price) + '"></label>' +
       '<label class="f">Hours it takes<input class="in" name="hours" type="number" min="0.5" step="0.5" inputmode="decimal" required value="' + Number(s.duration_minutes) / 60 + '"></label></div>' +
+      '<label class="f">Price per foot ($)<small>For boats priced by length. Then the price above is the minimum. Leave blank for a flat price.</small><input class="in" name="ppf" type="number" min="0" step="0.5" inputmode="decimal" value="' + esc(s.price_per_foot ?? "") + '"></label>' +
       '<label class="f">What\'s included<small>The assistant reads this to customers who ask.</small><textarea class="in" name="includes" rows="3" maxlength="600">' + esc(s.includes) + "</textarea></label>" +
       '<label class="check"><input type="checkbox" name="is_addon"' + (s.is_addon ? " checked" : "") + "><span>This is an add-on<small>Added to another service, like teak cleaning.</small></span></label>" +
       '<label class="check"><input type="checkbox" name="active"' + (s.active ? " checked" : "") + "><span>Offer this to customers<small>Uncheck to hide it without deleting it.</small></span></label>" +
@@ -642,8 +941,11 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
     setBadge("messages", convos().filter(c => c.needsReply).length);
     document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
     const top = sample ? '<div class="sample">Sample business with made-up customers. Nothing here is saved or texted. <a href="./">Sign in</a></div>' : "";
-    $("view").innerHTML = top + (tab === "today" ? viewToday() : tab === "messages" ? (chatId ? viewChat() : viewInbox()) : tab === "jobs" ? viewJobs() : viewSettings());
+    $("gear").hidden = false;
+    const views = { today: viewToday, jobs: viewJobs, customers: viewCustomers, results: viewResults, settings: viewSettings };
+    $("view").innerHTML = top + (tab === "messages" ? (chatId ? viewChat() : viewInbox()) : (views[tab] || viewToday)());
     if (tab === "messages" && chatId) { growBox(); window.scrollTo(0, document.body.scrollHeight); }
+    if (tab === "results") drawChart();
   }
 
   function growBox() { const t = $("msg"); if (t) { t.style.height = "auto"; t.style.height = Math.min(150, t.scrollHeight + 2) + "px"; } }
@@ -662,13 +964,18 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
 
   // ---------- Taps ----------
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-tab],[data-act],[data-chat],[data-job],[data-svc],[data-close],[data-back],[data-seg],[data-cancel],[data-signout]");
+    const t = e.target.closest("[data-tab],[data-act],[data-chat],[data-job],[data-svc],[data-close],[data-back],[data-seg],[data-cancel],[data-signout],[data-cust],[data-custedit],[data-newjob],[data-editjob],[data-days]");
     if (!t) return;
     const d = t.dataset;
     if (d.tab) return go(d.tab);
     if (d.chat) { composeText = ""; return go("messages", d.chat); }
     if (d.back !== undefined) return go("messages");
     if (d.seg) { jobsView = d.seg; return render(); }
+    if (d.days !== undefined) { resultsDays = Number(d.days); return render(); }
+    if (d.cust) return custSheet(d.cust);
+    if (d.custedit) return custSheet(d.custedit, true);
+    if (d.newjob !== undefined) return S.services.some(s => !s.is_addon && s.active) ? jobForm(null, d.newjob || null) : toast("Add a service in Settings first.");
+    if (d.editjob) return jobForm(d.editjob);
     if (d.job) return jobSheet(d.job);
     if (d.cancel) return jobSheet(d.cancel, true);
     if (d.svc) return serviceSheet(d.svc === "new" ? null : d.svc);
@@ -702,6 +1009,18 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
   document.addEventListener("input", e => {
     const t = e.target;
     if (t.id === "msg") { composeText = t.value; return growBox(); }
+    if (t.id === "custq") { custQuery = t.value; $("custlist").innerHTML = custRows(); return; }
+    const jf = t.closest("#jobform");
+    if (jf) {
+      if (t.name === "price" || t.name === "hours") jf.dataset.touched = "1";
+      if (t.name === "cust") {
+        $("newcust").hidden = !!t.value;
+        const len = S.customers[t.value]?.length_ft;
+        jf.len.value = len ?? "";
+      }
+      if (["svc", "add", "len", "cust"].includes(t.name)) fillJobForm(jf);
+      return;
+    }
     if (!draft) return;
     if (t.dataset.k) {
       const k = t.dataset.k;
@@ -733,10 +1052,17 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
       const v = new FormData(form);
       return act("saveService", {
         ...(form.dataset.id ? { id: form.dataset.id } : {}),
-        name: String(v.get("name")).trim(), price: Number(v.get("price")) || 0,
+        name: String(v.get("name")).trim(), price: Number(v.get("price")) || 0, price_per_foot: Number(v.get("ppf")) > 0 ? Number(v.get("ppf")) : null,
         duration_minutes: Math.max(30, Math.round(Number(v.get("hours")) * 2) * 30),
         includes: String(v.get("includes")).trim() || null, is_addon: v.has("is_addon"), active: v.has("active"),
       }, form.querySelector("button"));
+    }
+    if (form.id === "jobform") return saveJobForm(form);
+    if (form.id === "custform") {
+      const v = new FormData(form), len = Number(v.get("length_ft"));
+      const val = k => String(v.get(k) || "").trim() || null;
+      return act("saveCustomer", { id: form.dataset.id, fields: { name: val("name"), vehicle: val("vehicle"), address: val("address"), notes: val("notes"), length_ft: len > 0 ? len : null } },
+        form.querySelector("button"));
     }
     if (form.id === "login") return sendCode(form);
     if (form.id === "code") return checkCode(form);
@@ -754,6 +1080,7 @@ dialog.sheet::backdrop{background:rgba(8,12,16,.55)}
   function showLogin(step, note) {
     document.body.classList.add("out");
     $("tabs").hidden = true;
+    $("gear").hidden = true;
     $("bizname").textContent = "";
     $("view").innerHTML = '<div class="login"><div class="card">' + (step === "code"
       ? '<h1 class="page">Check your email</h1><p class="sub">We sent a sign-in link and code to <b>' + esc(loginEmail) + "</b>. Tap the link, or type the code here.</p>" +
